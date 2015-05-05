@@ -7,6 +7,7 @@ gem_group :development do
   gem 'guard-rspec', require: false
   gem 'rack-livereload'
   gem 'guard-livereload', '~> 2.4', require: false
+  gem 'guard-ctags-bundler', require: false
 end
 
 # Remove turbolinks
@@ -26,6 +27,7 @@ copy_file 'Procfile'
 
 after_bundle do
   git :init
+  inject_into_file '.gitignore', "gems.tags\n"
   git add: '.'
   git commit: %Q{ -m 'Initial commit' }
   run 'bundle exec rails g rspec:install'
