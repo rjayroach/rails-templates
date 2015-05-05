@@ -9,7 +9,12 @@ gem_group :development do
   gem 'guard-livereload', '~> 2.4', require: false
 end
 
-#gsub_file 'Gemfile', /#\s*(filter_parameter_logging :password)/, '\1'
+# Remove turbolinks
+gsub_file 'Gemfile', /gem 'turbolinks'/, ''
+gsub_file 'app/assets/javascripts/application.js', /\/\/= require turbolinks/, ''
+
+# Run livereload in development
+inject_into_file 'config/environments/development.rb', "  config.middleware.use Rack::LiveReload\n", after: "Rails.application.configure do\n"
 
 def source_paths
   Array(super) +
@@ -28,5 +33,5 @@ after_bundle do
 end
 
 # Remove after testing
-#generate :scaffold, 'blog', 'title:string', 'content:string'
-#rake 'db:migrate db:test:prepare'
+generate :scaffold, 'blog', 'title:string', 'content:string'
+rake 'db:migrate db:test:prepare'
