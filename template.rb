@@ -1,4 +1,5 @@
 gem 'therubyracer'
+gem 'mysql2'
 
 gem_group :development do
   gem 'pry-rails'
