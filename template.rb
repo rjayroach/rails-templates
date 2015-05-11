@@ -12,6 +12,8 @@ gem_group :development do
   gem 'rack-livereload'
   gem 'guard-livereload', '~> 2.4', require: false
   gem 'guard-ctags-bundler', require: false
+  gem 'brakeman', require: false
+  gem 'cane', require: false
 end
 
 @github_username = ask('github user name')
