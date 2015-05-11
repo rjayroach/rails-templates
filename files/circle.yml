@@ -1,0 +1,27 @@
+machine:
+  ruby:
+    version: 2.1.3
+  services:
+    - docker
+
+dependencies:
+  cache_directories:
+    - "~/docker"
+  override:
+    - docker info
+    - docker build -t rjayroach/ship .
+
+database:
+  override:
+    - docker run rjayroach/ship bundle exec rake db:create db:schema:load --trace
+
+test:
+  override:
+    - docker run rjayroach/ship bundle exec rake spec
+
+deployment:
+  hub: 
+    branch: master
+    commands:
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push rjayroach/ship
