@@ -45,13 +45,13 @@ guard 'ctags-bundler', src_path: ['app', 'lib', 'spec/support'] do
   watch('Gemfile.lock')
 end
 
-guard :brakeman, run_on_start: RUN_ON_START, quiet: true do
+guard :brakeman, run_on_start: false, quiet: true do
   watch(%r{^app/.+\.(erb|haml|slim|rhtml|rb)$})
   watch(%r{^config/.+\.rb$})
   watch(%r{^lib/.+\.rb$})
   watch('Gemfile')
 end
 
-guard :cane do
+guard :rubocop, all_on_start: false, cli: ['--format', 'clang', '--rails'] do
   watch(%r{^(.+)\.rb$})
 end

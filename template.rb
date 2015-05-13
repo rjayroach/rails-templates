@@ -3,8 +3,11 @@ gem 'therubyracer'
 # specificy database with -d option
 # rails new myapp -d=postgresql
 
+gem_group [:development, :test] do
+  gem 'dotenv-rails'
+end
+
 gem_group :development do
-  gem 'dotenv'
   gem 'pry-rails'
   gem 'awesome_print'
   gem 'rspec-rails'
@@ -12,8 +15,9 @@ gem_group :development do
   gem 'rack-livereload'
   gem 'guard-livereload', '~> 2.4', require: false
   gem 'guard-ctags-bundler', require: false
+  gem 'guard-rubocop', require: false
   gem 'brakeman', require: false
-  gem 'cane', require: false
+  gem 'rubocop', require: false
 end
 
 @github_username = ask('github user name')
