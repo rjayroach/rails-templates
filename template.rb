@@ -43,6 +43,7 @@ end
 copy_file 'Guardfile'
 copy_file 'Procfile'
 copy_file 'circle.yml'
+copy_file 'database.yml', 'config/database.yml'
 
 after_bundle do
   git :init
