@@ -50,6 +50,8 @@ template 'env', '.env'
 remove_file 'config/database.yml'
 copy_file 'database.yml', 'config/database.yml'
 
+@include_test_models = yes?('Include test models?')
+
 after_bundle do
   git :init
   inject_into_file '.gitignore', "\ngems.tags", after: "/tmp"
@@ -63,8 +65,8 @@ after_bundle do
   run 'npm install --save-dev ember-cli-rails-addon@0.0.11' if @ember_cli_rails
 
   # Remove after testing
-  generate :scaffold, 'blog', 'title:string', 'content:string'
-  rake 'db:migrate db:test:prepare'
+  generate :scaffold, 'blog', 'title:string', 'content:string' if @include_test_models
+  rake 'db:migrate db:test:prepare' if @include_test_models
 
 end
 
