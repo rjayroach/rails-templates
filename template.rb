@@ -7,8 +7,11 @@ gem_group :development, :test do
   gem 'dotenv-rails'
 end
 
+@include_sprig = yes?('Include sprig?')
+
 gem_group :development do
   gem 'pry-rails'
+  gem 'sprig' if @include_sprig
   gem 'awesome_print'
   gem 'rspec-rails'
   gem 'guard-rspec', require: false
@@ -44,6 +47,7 @@ gsub_file 'app/assets/javascripts/application.js', /\/\/= require turbolinks/, '
 # Run livereload in development
 inject_into_file 'config/environments/development.rb', "  config.middleware.use Rack::LiveReload\n", after: "Rails.application.configure do\n"
 
+inject_into_file 'db/seeds.rb', "include Sprig::Helpers\n", after: ".first)\n" if @include_sprig
 #@app_name
 #@app_path
 
@@ -64,6 +68,8 @@ after_bundle do
   run 'rm -rf test'
   run 'rails generate ember-cli:init' if @ember_cli_rails
   run 'npm install --save-dev ember-cli-rails-addon@0.0.11' if @ember_cli_rails
+
+  run 'rails generate sprig:install' if @include_sprig
 
   # Remove after testing
   generate :scaffold, 'blog', 'title:string', 'content:string' if @include_test_models
