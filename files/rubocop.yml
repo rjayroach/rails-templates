@@ -1,0 +1,11 @@
+AllCops:
+  Excludes:
+    - db/**
+    - bin/**
+    - Guardfile
+    - spec/spec_helper.rb
+  RunRailsCops: true
+Documentation:
+  Enabled: false
+Metrics/LineLength:
+  Max: 120

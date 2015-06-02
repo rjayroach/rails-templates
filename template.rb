@@ -54,6 +54,7 @@ inject_into_file 'db/seeds.rb', "include Sprig::Helpers\n", after: ".first)\n" i
 copy_file 'Guardfile'
 copy_file 'Procfile'
 copy_file 'circle.yml'
+copy_file 'rubocop.yml', '.rubocop.yml'
 template 'env', '.env'
 remove_file 'config/database.yml'
 copy_file 'database.yml', 'config/database.yml'
