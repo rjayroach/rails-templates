@@ -40,9 +40,14 @@ def source_paths
     [File.join(File.expand_path(File.dirname(__FILE__)),'files')]
 end
 
+#@app_name
+#@app_path
+
 copy_file 'Guardfile'
 copy_file 'Procfile'
 copy_file 'circle.yml'
+template 'env', '.env'
+remove_file 'config/database.yml'
 copy_file 'database.yml', 'config/database.yml'
 
 after_bundle do
