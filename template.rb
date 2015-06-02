@@ -19,7 +19,8 @@ gem_group :development do
   gem 'guard-livereload', '~> 2.4', require: false
   gem 'guard-ctags-bundler', require: false
   gem 'guard-rubocop', require: false
-  gem 'brakeman', require: false
+  gem 'brakeman', '~> 3.0', require: false
+  gem 'guard-brakeman', require: false
   gem 'rubocop', require: false
 end
 
