@@ -57,6 +57,7 @@ copy_file 'circle.yml'
 template 'env', '.env'
 remove_file 'config/database.yml'
 copy_file 'database.yml', 'config/database.yml'
+copy_file 'db.rake', 'lib/tasks/db.rake'
 
 
 after_bundle do
