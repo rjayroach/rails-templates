@@ -28,6 +28,10 @@ end
 @ember_cli_rails = yes?('Use ember-cli-rails?')
 gem 'ember-cli-rails' if @ember_cli_rails
 
+@include_test_models = yes?('Include test models?')
+@include_docker = yes?('Include docker?')
+copy_file 'Dockerfile' if @include_docker
+
 # Remove turbolinks
 gsub_file 'Gemfile', /gem 'turbolinks'/, ''
 gsub_file 'app/assets/javascripts/application.js', /\/\/= require turbolinks/, ''
@@ -50,14 +54,11 @@ template 'env', '.env'
 remove_file 'config/database.yml'
 copy_file 'database.yml', 'config/database.yml'
 
-@include_test_models = yes?('Include test models?')
 
 after_bundle do
   git :init
-  inject_into_file '.gitignore', "\ngems.tags", after: "/tmp"
+  inject_into_file '.gitignore', "\nproject.tags", after: "/tmp"
   inject_into_file '.gitignore', "\n.env", after: "/tmp"
-  git add: '.'
-  git commit: %Q{ -m 'Initial commit' }
   run "git remote add origin git@github.com:#{@github_username}/#{@github_reponame}.git"
   run 'bundle exec rails generate rspec:install'
   run 'rm -rf test'
@@ -68,8 +69,6 @@ after_bundle do
   generate :scaffold, 'blog', 'title:string', 'content:string' if @include_test_models
   rake 'db:migrate db:test:prepare' if @include_test_models
 
+  git add: '.'
+  git commit: %Q{ -m 'Initial commit' }
 end
-
-
-@include_docker = yes?('Include docker?')
-copy_file 'Dockerfile' if @include_docker
