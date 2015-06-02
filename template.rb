@@ -3,7 +3,7 @@ gem 'therubyracer'
 # specificy database with -d option
 # rails new myapp -d=postgresql
 
-gem_group [:development, :test] do
+gem_group :development, :test do
   gem 'dotenv-rails'
 end
 
