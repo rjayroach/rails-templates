@@ -28,6 +28,11 @@ end
 @ember_cli_rails = yes?('Use ember-cli-rails?')
 gem 'ember-cli-rails' if @ember_cli_rails
 
+def source_paths
+  Array(super) +
+    [File.join(File.expand_path(File.dirname(__FILE__)),'files')]
+end
+
 @include_test_models = yes?('Include test models?')
 @include_docker = yes?('Include docker?')
 copy_file 'Dockerfile' if @include_docker
@@ -38,11 +43,6 @@ gsub_file 'app/assets/javascripts/application.js', /\/\/= require turbolinks/, '
 
 # Run livereload in development
 inject_into_file 'config/environments/development.rb', "  config.middleware.use Rack::LiveReload\n", after: "Rails.application.configure do\n"
-
-def source_paths
-  Array(super) +
-    [File.join(File.expand_path(File.dirname(__FILE__)),'files')]
-end
 
 #@app_name
 #@app_path
