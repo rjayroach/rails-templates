@@ -11,7 +11,7 @@
 #
 default: &default
   adapter: mysql2
-  database: <%= ENV['DATABASE_DATABASE'] %>
+  database: <%= ENV['DATABASE_NAME'] %>
   host: <%= ENV['DATABASE_HOST'] %>
   encoding: utf8
   password: <%= ENV['DATABASE_PASSWORD'] %>
