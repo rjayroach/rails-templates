@@ -5,6 +5,7 @@ gem 'therubyracer'
 
 gem_group :development, :test do
   gem 'dotenv-rails'
+  gem 'database_cleaner'
 end
 
 @include_sprig = yes?('Include sprig?')
@@ -68,6 +69,21 @@ after_bundle do
   inject_into_file '.gitignore', "\n.env", after: "/tmp"
   run "git remote add origin git@github.com:#{@github_username}/#{@github_reponame}.git"
   run 'bundle exec rails generate rspec:install'
+  inject_into_file 'spec/rails_helper.rb', after: "config.infer_spec_type_from_file_location!\n" do <<-'RUBY'
+
+  config.before(:suite) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
+  end
+RUBY
+  end
+
   run 'rm -rf test'
   run 'rails generate ember-cli:init' if @ember_cli_rails
   run 'npm install --save-dev ember-cli-rails-addon@0.0.11' if @ember_cli_rails

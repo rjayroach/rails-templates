@@ -8,4 +8,9 @@ namespace :db do
       Rake::Task['db:seed'].invoke
     end
   end
+
+  desc 'Truncate all existing data'
+  task truncate: [:environment] do
+    DatabaseCleaner.clean_with :truncation
+  end
 end
