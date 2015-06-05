@@ -12,6 +12,7 @@ end
 @include_sprig = yes?('Include sprig?')
 
 gem_group :development do
+  gem 'curb', require: false
   gem 'pry-rails'
   gem 'sprig' if @include_sprig
   gem 'awesome_print'
