@@ -4,6 +4,7 @@ gem 'therubyracer'
 # rails new myapp -d=postgresql
 
 gem_group :development, :test do
+  gem 'factory_girl_rails'
   gem 'dotenv-rails'
   gem 'database_cleaner'
 end
@@ -11,7 +12,6 @@ end
 @include_sprig = yes?('Include sprig?')
 
 gem_group :development do
-  gem 'factory_girl_rails'
   gem 'pry-rails'
   gem 'sprig' if @include_sprig
   gem 'awesome_print'
