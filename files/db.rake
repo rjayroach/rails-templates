@@ -13,4 +13,11 @@ namespace :db do
   task truncate: [:environment] do
     DatabaseCleaner.clean_with :truncation
   end
+
+  namespace :seed do
+    desc 'Truncate all existing data and run seeds'
+    task clean: ['db:truncate'] do
+      Rake::Task['db:seed'].invoke
+    end
+  end
 end

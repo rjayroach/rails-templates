@@ -11,6 +11,7 @@ end
 @include_sprig = yes?('Include sprig?')
 
 gem_group :development do
+  gem 'factory_girl_rails'
   gem 'pry-rails'
   gem 'sprig' if @include_sprig
   gem 'awesome_print'
@@ -72,8 +73,15 @@ after_bundle do
   inject_into_file 'spec/rails_helper.rb', after: "config.infer_spec_type_from_file_location!\n" do <<-'RUBY'
 
   config.before(:suite) do
-    DatabaseCleaner.strategy = :transaction
-    DatabaseCleaner.clean_with(:truncation)
+    begin
+      DatabaseCleaner.strategy = :transaction
+      DatabaseCleaner.clean_with(:truncation)
+      # See: http://www.rubydoc.info/gems/factory_girl/file/GETTING_STARTED.md
+      # DatabaseCleaner.start
+      FactoryGirl.lint
+    ensure
+      DatabaseCleaner.clean
+    end
   end
 
   config.around(:each) do |example|
