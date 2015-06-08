@@ -10,6 +10,11 @@ gem_group :development, :test do
 end
 
 @include_sprig = yes?('Include sprig?')
+#@include_bootstrap = yes?('Include bootstrap?')
+@include_foundation = yes?('Include foundation?')
+
+#gem 'twitter-bootstrap-rails' if @include_bootstrap
+gem 'foundation-rails', '5.5.2.1' if @include_foundation
 
 gem_group :development do
   gem 'curb', require: false
@@ -65,6 +70,15 @@ copy_file 'database.yml', 'config/database.yml'
 copy_file 'db.rake', 'lib/tasks/db.rake'
 
 
+=begin
+# into config/application.rb
+  g.template_engine :erb
+  g.test_framework  :shoulda, fixture: false
+  g.stylesheets     false
+  g.javascripts     false
+=end
+
+
 after_bundle do
   git :init
   inject_into_file '.gitignore', "\nproject.tags", after: "/tmp"
@@ -94,6 +108,8 @@ RUBY
   end
 
   run 'rm -rf test'
+  #run 'rails generate bootstrap:install static' if @bootstrap
+  run 'rails generate foundation:install' if @foundation
   run 'rails generate ember-cli:init' if @ember_cli_rails
   run 'npm install --save-dev ember-cli-rails-addon@0.0.11' if @ember_cli_rails
 
