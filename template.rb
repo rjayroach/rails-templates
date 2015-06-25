@@ -12,9 +12,11 @@ end
 @include_sprig = yes?('Include sprig?')
 #@include_bootstrap = yes?('Include bootstrap?')
 @include_foundation = yes?('Include foundation?')
+@include_doorkeeper = yes?('Include doorkeeper?')
 
 #gem 'twitter-bootstrap-rails' if @include_bootstrap
 gem 'foundation-rails', '5.5.2.1' if @include_foundation
+gem 'doorkeeper', '3.0.0.rc1' if @include_doorkeepr
 
 gem_group :development do
   gem 'curb', require: false
@@ -85,6 +87,13 @@ after_bundle do
   inject_into_file '.gitignore', "\n.env", after: "/tmp"
   run "git remote add origin git@github.com:#{@github_username}/#{@github_reponame}.git"
   run 'bundle exec rails generate rspec:install'
+  run 'bundle exec rails generate doorkeeper:migration'
+  inject_into_file 'spec/rails_helper.rb', after: "config.fixture_path = \"#{::Rails.root}/spec/fixtures\"\n" do <<-'RUBY'
+  config.include FactoryGirl::Syntax::Methods
+RUBY
+  end
+  # TODO: remove tconfig.fixture_path:
+  # -  config.fixture_path = "#{::Rails.root}/spec/fixtures"
   inject_into_file 'spec/rails_helper.rb', after: "config.infer_spec_type_from_file_location!\n" do <<-'RUBY'
 
   config.before(:suite) do
