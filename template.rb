@@ -87,6 +87,7 @@ after_bundle do
   inject_into_file '.gitignore', "\n.env", after: "/tmp"
   run "git remote add origin git@github.com:#{@github_username}/#{@github_reponame}.git"
   run 'bundle exec rails generate rspec:install'
+  run 'bundle exec rails generate doorkeeper:install'
   run 'bundle exec rails generate doorkeeper:migration'
   inject_into_file 'spec/rails_helper.rb', after: "config.fixture_path = \"#{::Rails.root}/spec/fixtures\"\n" do <<-'RUBY'
   config.include FactoryGirl::Syntax::Methods
@@ -94,6 +95,8 @@ RUBY
   end
   # TODO: remove tconfig.fixture_path:
   # -  config.fixture_path = "#{::Rails.root}/spec/fixtures"
+  # TODO: comment out use_transactional_fixtures:
+  # # config.use_transactional_fixtures = true
   inject_into_file 'spec/rails_helper.rb', after: "config.infer_spec_type_from_file_location!\n" do <<-'RUBY'
 
   config.before(:suite) do

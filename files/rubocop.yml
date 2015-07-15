@@ -1,7 +1,7 @@
 AllCops:
   Exclude:
-    - db/**
-    - bin/**
+    - db/**/*
+    - bin/**/*
     - Guardfile
     - spec/spec_helper.rb
   RunRailsCops: true
