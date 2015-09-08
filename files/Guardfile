@@ -20,7 +20,7 @@ notification :tmux,
   # Notify on all tmux clients
   display_on_all_clients: false
 
-guard :rspec, cmd: 'bundle exec rspec' do
+guard :rspec, cmd: 'bin/rspec' do
   watch('spec/spec_helper.rb')                        { "spec" }
   watch('config/routes.rb')                           { "spec/routing" }
   watch('app/controllers/application_controller.rb')  { "spec/controllers" }
