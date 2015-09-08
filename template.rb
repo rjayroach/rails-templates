@@ -1,4 +1,20 @@
+
+# apply File.expandpath("../templates/sphinx.rb", _FILE__)
+# Stop spring if it is running in new app directory
+# TODO: This never gets called
+STDOUT.puts @app_path
+if Dir.exists? @app_path
+  STDOUT.puts 'hello'
+  @overwrite = yes?('WARNING: DIRECTORY ALREADY EXISTS; Overwrite?')
+  begin
+    Dir.chdir(@app_path) {spring stop}
+  ensure
+    Dir.rmdir(@app_path)
+  end
+end
+
 gem 'therubyracer'
+gem 'mysql2'
 
 # specificy database with -d option
 # rails new myapp -d=postgresql
@@ -13,13 +29,15 @@ end
 #@include_bootstrap = yes?('Include bootstrap?')
 @include_foundation = yes?('Include foundation?')
 @include_doorkeeper = yes?('Include doorkeeper?')
+@include_devise = yes?('Include devise?')
 
 #gem 'twitter-bootstrap-rails' if @include_bootstrap
 gem 'foundation-rails', '5.5.2.1' if @include_foundation
-gem 'doorkeeper', '3.0.0.rc1' if @include_doorkeepr
+gem 'doorkeeper' if @include_doorkeeper
+gem 'devise' if @include_devise
 
 gem_group :development do
-  gem 'curb', require: false
+  # gem 'curb', require: false
   gem 'pry-rails'
   gem 'sprig' if @include_sprig
   gem 'awesome_print'
@@ -32,7 +50,14 @@ gem_group :development do
   gem 'brakeman', '~> 3.0', require: false
   gem 'guard-brakeman', require: false
   gem 'rubocop', require: false
+  gem 'spring-commands-rspec'
+  # gem 'rails_best_practices', require: false
+  # gem 'raddocs'
 end
+
+# group :test do
+#   gem 'rspec_api_documentation', require: false
+# end
 
 @github_username = ask('github user name')
 @github_reponame = ask('github repo name')
@@ -56,15 +81,15 @@ gsub_file 'Gemfile', /gem 'turbolinks'/, ''
 gsub_file 'app/assets/javascripts/application.js', /\/\/= require turbolinks/, ''
 
 # Run livereload in development
-inject_into_file 'config/environments/development.rb', "  config.middleware.use Rack::LiveReload\n", after: "Rails.application.configure do\n"
+environment 'config.middleware.use Rack::LiveReload', env: 'development'
 
-inject_into_file 'db/seeds.rb', "include Sprig::Helpers\n", after: ".first)\n" if @include_sprig
+append_file 'db/seeds.rb', "include Sprig::Helpers\n"
 #@app_name
 #@app_path
 
 copy_file 'Guardfile'
 copy_file 'Procfile'
-copy_file 'circle.yml'
+template 'circle.yml', 'circle.yml'
 copy_file 'rubocop.yml', '.rubocop.yml'
 template 'env', '.env'
 remove_file 'config/database.yml'
@@ -83,13 +108,18 @@ copy_file 'db.rake', 'lib/tasks/db.rake'
 
 after_bundle do
   git :init
-  inject_into_file '.gitignore', "\nproject.tags", after: "/tmp"
-  inject_into_file '.gitignore', "\n.env", after: "/tmp"
-  run "git remote add origin git@github.com:#{@github_username}/#{@github_reponame}.git"
-  run 'bundle exec rails generate rspec:install'
-  run 'bundle exec rails generate doorkeeper:install'
-  run 'bundle exec rails generate doorkeeper:migration'
-  inject_into_file 'spec/rails_helper.rb', after: "config.fixture_path = \"#{::Rails.root}/spec/fixtures\"\n" do <<-'RUBY'
+  append_file '.gitignore', "project.tags\n"
+  append_file '.gitignore', ".env\n"
+  git remote: "add origin git@github.com:#{@github_username}/#{@github_reponame}.git"
+  generate('rspec:install')
+  if @include_doorkeeper
+    generate('doorkeeper:install')
+    generate('doorkeeper:migration')
+  end
+  generate('devise:install') if @include_devise
+  run 'bundle exec spring binstub --all'
+  # inject_into_file 'spec/rails_helper.rb', after: "config.fixture_path = \"#{::Rails.root}/spec/fixtures\"\n" do <<-'RUBY'
+  inject_into_file 'spec/rails_helper.rb', after: "config.infer_spec_type_from_file_location!\n" do <<-'RUBY'
   config.include FactoryGirl::Syntax::Methods
 RUBY
   end
@@ -120,16 +150,18 @@ RUBY
   end
 
   run 'rm -rf test'
-  #run 'rails generate bootstrap:install static' if @bootstrap
-  run 'rails generate foundation:install' if @foundation
-  run 'rails generate ember-cli:init' if @ember_cli_rails
+  #generate('bootstrap:install static') if @bootstrap
+  generate 'foundation:install' if @foundation
+  generate 'ember-cli:init' if @ember_cli_rails
   run 'npm install --save-dev ember-cli-rails-addon@0.0.11' if @ember_cli_rails
 
-  run 'rails generate sprig:install' if @include_sprig
+  generate 'sprig:install' if @include_sprig
 
   # Remove after testing
-  generate :scaffold, 'blog', 'title:string', 'content:string' if @include_test_models
-  rake 'db:migrate db:test:prepare' if @include_test_models
+  if @include_test_models
+    generate :scaffold, 'blog', 'title:string', 'content:string'
+    rake 'db:migrate db:test:prepare'
+  end
 
   git add: '.'
   git commit: %Q{ -m 'Initial commit' }
