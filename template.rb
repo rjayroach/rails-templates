@@ -1,5 +1,21 @@
 
+type = :plugin
+# type = :app
+
+base_dir = type.eql?(:plugin) ? 'spec/dummy/' : ''
+@app_name ||= @app_path
+
+STDOUT.puts '-' * 10
+STDOUT.puts type
+STDOUT.puts base_dir
+STDOUT.puts @app_name
+STDOUT.puts @app_path
+STDOUT.puts '-' * 10
+
+# rails plugin new ezlink --mountable --skip-test-unit --dummy-path=spec/dummy -m ../rails-templates/template.rb
+# See: https://quickleft.com/blog/rails-application-templates/
 # apply File.expandpath("../templates/sphinx.rb", _FILE__)
+# get URL
 # Stop spring if it is running in new app directory
 # TODO: This never gets called
 STDOUT.puts @app_path
@@ -14,7 +30,9 @@ if Dir.exists? @app_path
 end
 
 gem 'therubyracer'
-gem 'mysql2'
+# NOTE: Bug in mysql2 0.4.1 and rails 4.2.4
+# See: https://github.com/rails/rails/issues/21544
+gem 'mysql2', '~> 0.3.18'
 
 # specificy database with -d option
 # rails new myapp -d=postgresql
@@ -25,13 +43,33 @@ gem_group :development, :test do
   gem 'database_cleaner'
 end
 
-@include_sprig = yes?('Include sprig?')
-#@include_bootstrap = yes?('Include bootstrap?')
-@include_foundation = yes?('Include foundation?')
-@include_doorkeeper = yes?('Include doorkeeper?')
-@include_devise = yes?('Include devise?')
+@github_username = ask('github user name')
+@github_reponame = ask('github repo name')
 
-#gem 'twitter-bootstrap-rails' if @include_bootstrap
+@include_sprig = false
+@include_bootstrap = false
+@include_foundation = false
+@include_doorkeeper = false
+@include_devise = false
+@ember_cli_rails = false
+@include_test_models = false
+@include_docker = false
+
+
+
+if type.eql?(:app)
+  @include_sprig = yes?('Include sprig?')
+  #@include_bootstrap = yes?('Include bootstrap?')
+  @include_foundation = yes?('Include foundation?')
+  @include_doorkeeper = yes?('Include doorkeeper?')
+  @include_devise = yes?('Include devise?')
+  @ember_cli_rails = yes?('Use ember-cli-rails?')
+  @include_test_models = yes?('Include test models?')
+  @include_docker = yes?('Include docker?')
+end
+
+
+gem 'twitter-bootstrap-rails' if @include_bootstrap
 gem 'foundation-rails', '5.5.2.1' if @include_foundation
 gem 'doorkeeper' if @include_doorkeeper
 gem 'devise' if @include_devise
@@ -59,12 +97,8 @@ end
 #   gem 'rspec_api_documentation', require: false
 # end
 
-@github_username = ask('github user name')
-@github_reponame = ask('github repo name')
-
 # See: https://github.com/rwz/ember-cli-rails
 # See also: https://libraries.io/npm/ember-cli-rails-addon
-@ember_cli_rails = yes?('Use ember-cli-rails?')
 gem 'ember-cli-rails' if @ember_cli_rails
 
 def source_paths
@@ -72,30 +106,31 @@ def source_paths
     [File.join(File.expand_path(File.dirname(__FILE__)),'files')]
 end
 
-@include_test_models = yes?('Include test models?')
-@include_docker = yes?('Include docker?')
 copy_file 'Dockerfile' if @include_docker
 
 # Remove turbolinks
 gsub_file 'Gemfile', /gem 'turbolinks'/, ''
-gsub_file 'app/assets/javascripts/application.js', /\/\/= require turbolinks/, ''
+gsub_file("#{base_dir}app/assets/javascripts/application.js", /\/\/= require turbolinks/, '')
 
 # Run livereload in development
-environment 'config.middleware.use Rack::LiveReload', env: 'development'
+# FIXME: Not working with engine
+unless type.eql?(:plugin)
+  environment 'config.middleware.use Rack::LiveReload', env: 'development'
+  append_file 'db/seeds.rb', "include Sprig::Helpers\n"
+end
 
-append_file 'db/seeds.rb', "include Sprig::Helpers\n"
-#@app_name
-#@app_path
 
 copy_file 'Guardfile'
 copy_file 'Procfile'
 template 'circle.yml', 'circle.yml'
 copy_file 'rubocop.yml', '.rubocop.yml'
-template 'env', '.env'
-remove_file 'config/database.yml'
-copy_file 'database.yml', 'config/database.yml'
-copy_file 'db.rake', 'lib/tasks/db.rake'
+template 'env', "#{base_dir}.env"
+remove_file "#{base_dir}config/database.yml"
+copy_file 'database.yml', "#{base_dir}config/database.yml"
+copy_file 'db.rake', "#{base_dir}lib/tasks/db.rake"
 
+if type.eql?(:plugin)
+  copy_file 'spring.rb', 'config/spring.rb'
 
 =begin
 # into config/application.rb
@@ -105,8 +140,23 @@ copy_file 'db.rake', 'lib/tasks/db.rake'
   g.javascripts     false
 =end
 
+  inject_into_file "lib/#{@app_name}/engine.rb", after: "isolate_namespace #{@app_name.capitalize}\n" do <<-'RUBY'
+    config.generators do |g|
+      g.test_framework :rspec, fixture: false
+      g.fixture_replacement :factory_girl, dir: 'spec/factories'
+      g.assets false
+      g.helper false
+    end
+RUBY
+  end
+end
 
-after_bundle do
+
+# NOTE: after_bundle should be called by the application framework but it doesn't work for engines
+#   Therefore I am overriding run_bundle to call 'bundle install' along with the 'after_bundle' tasks
+def run_bundle
+  run 'bundle'
+#after_bundle do
   git :init
   append_file '.gitignore', "project.tags\n"
   append_file '.gitignore', ".env\n"
