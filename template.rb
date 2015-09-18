@@ -1,6 +1,6 @@
 
-type = :plugin
-# type = :app
+type = :app
+type = :plugin if @app_name.nil?
 
 base_dir = type.eql?(:plugin) ? 'spec/dummy/' : ''
 @app_name ||= @app_path
@@ -56,9 +56,9 @@ end
 @include_docker = false
 
 
+@include_sprig = yes?('Include sprig?')
 
 if type.eql?(:app)
-  @include_sprig = yes?('Include sprig?')
   #@include_bootstrap = yes?('Include bootstrap?')
   @include_foundation = yes?('Include foundation?')
   @include_doorkeeper = yes?('Include doorkeeper?')
@@ -157,6 +157,7 @@ end
 def run_bundle
   run 'bundle'
 #after_bundle do
+inside '.' do
   git :init
   append_file '.gitignore', "project.tags\n"
   append_file '.gitignore', ".env\n"
@@ -205,7 +206,7 @@ RUBY
   generate 'ember-cli:init' if @ember_cli_rails
   run 'npm install --save-dev ember-cli-rails-addon@0.0.11' if @ember_cli_rails
 
-  generate 'sprig:install' if @include_sprig
+  run 'spring rails generate sprig:install' if @include_sprig
 
   # Remove after testing
   if @include_test_models
@@ -215,4 +216,5 @@ RUBY
 
   git add: '.'
   git commit: %Q{ -m 'Initial commit' }
+end
 end
