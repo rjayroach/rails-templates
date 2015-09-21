@@ -114,9 +114,28 @@ gsub_file("#{base_dir}app/assets/javascripts/application.js", /\/\/= require tur
 
 # Run livereload in development
 # FIXME: Not working with engine
-unless type.eql?(:plugin)
+if type.eql?(:app)
   environment 'config.middleware.use Rack::LiveReload', env: 'development'
-  append_file 'db/seeds.rb', "include Sprig::Helpers\n"
+elsif type.eql?(:plugin)
+  Dir.mkdir('db')
+  File.touch('db/seeds.rb')
+end
+
+if @include_sprig
+  append_file 'db/seeds.rb', "include Sprig::Helpers\n\n"
+  inject_into_file 'db/seeds.rb', after: "include Sprig::Helpers\n\n" do <<-'RUBY'
+# NOTE: Config the directory so an enclosing app can find the seed files
+Sprig.configure do |c|
+  c.directory = "#{File.expand_path(File.dirname(__FILE__))}/seeds"
+end
+
+if Rails.env.eql? 'development'
+  sprig [
+  ]
+ end
+end
+RUBY
+  end
 end
 
 
@@ -124,6 +143,7 @@ copy_file 'Guardfile'
 copy_file 'Procfile'
 template 'circle.yml', 'circle.yml'
 copy_file 'rubocop.yml', '.rubocop.yml'
+copy_file 'ci.rake', "#{base_dir}lib/tasks/ci.rake"
 template 'env', "#{base_dir}.env"
 remove_file "#{base_dir}config/database.yml"
 copy_file 'database.yml', "#{base_dir}config/database.yml"
@@ -131,6 +151,7 @@ copy_file 'db.rake', "#{base_dir}lib/tasks/db.rake"
 
 if type.eql?(:plugin)
   copy_file 'spring.rb', 'config/spring.rb'
+  File.touch 'config/environment.rb'
 
 =begin
 # into config/application.rb
@@ -141,6 +162,17 @@ if type.eql?(:plugin)
 =end
 
   inject_into_file "lib/#{@app_name}/engine.rb", after: "isolate_namespace #{@app_name.capitalize}\n" do <<-'RUBY'
+
+    # Include migrations without physically copying into main project
+    # See: http://blog.pivotal.io/labs/labs/leave-your-migrations-in-your-rails-engines
+    initializer :append_migrations do |app|
+      unless app.root.to_s.match root.to_s
+        config.paths['db/migrate'].expanded.each do |expanded_path|
+          app.config.paths['db/migrate'] << expanded_path
+        end
+      end
+    end
+
     config.generators do |g|
       g.test_framework :rspec, fixture: false
       g.fixture_replacement :factory_girl, dir: 'spec/factories'
@@ -161,6 +193,9 @@ inside '.' do
   git :init
   append_file '.gitignore', "project.tags\n"
   append_file '.gitignore', ".env\n"
+  append_file('.gitignore', "config/environment.rb\n") if type.eql?(:plugin)
+  # TODO: test copy_file and change to template so to add the app: when a plugin
+  copy_file '.git/hooks/pre-commit', 'pre-commit'
   git remote: "add origin git@github.com:#{@github_username}/#{@github_reponame}.git"
   generate('rspec:install')
   if @include_doorkeeper
@@ -170,6 +205,12 @@ inside '.' do
   generate('devise:install') if @include_devise
   run 'bundle exec spring binstub --all'
   # inject_into_file 'spec/rails_helper.rb', after: "config.fixture_path = \"#{::Rails.root}/spec/fixtures\"\n" do <<-'RUBY'
+  inject_into_file 'spec/rails_helper.rb', after: "Rails is not loaded until this point!\n" do <<-'RUBY'
+require 'pry'
+Dir[Rails.root.join('../..', 'spec/support/**/*.rb')].each { |f| require f }
+Dir[Rails.root.join('../..', 'spec/factories/**/*.rb')].each { |f| require f }
+RUBY
+  end
   inject_into_file 'spec/rails_helper.rb', after: "config.infer_spec_type_from_file_location!\n" do <<-'RUBY'
   config.include FactoryGirl::Syntax::Methods
 RUBY
