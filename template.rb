@@ -152,6 +152,8 @@ copy_file 'db.rake', "#{@base_dir}lib/tasks/db.rake"
 if @type.eql?(:plugin)
   copy_file 'spring.rb', 'config/spring.rb'
   FileUtils.touch '../../config/environment.rb'
+  FileUtils.touch 'db/seeds.rb'
+  append_file 'spec/dummy/db/seeds.rb', "#{@app_name.capitalize}::Engine.load_seed\n"
 
 =begin
 # into config/application.rb
