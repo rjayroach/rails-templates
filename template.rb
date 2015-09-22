@@ -1,16 +1,42 @@
 
-type = :app
-type = :plugin if @app_name.nil?
+@type = :app
+@type = :plugin if @app_name.nil?
 
-base_dir = type.eql?(:plugin) ? 'spec/dummy/' : ''
+@base_dir = @type.eql?(:plugin) ? 'spec/dummy/' : ''
 @app_name ||= @app_path
 
 STDOUT.puts '-' * 10
-STDOUT.puts type
-STDOUT.puts base_dir
+STDOUT.puts @type
+STDOUT.puts @base_dir
 STDOUT.puts @app_name
 STDOUT.puts @app_path
 STDOUT.puts '-' * 10
+
+@github_username = ask('github user name')
+@github_reponame = ask('github repo name')
+
+@include_sprig = false
+@include_bootstrap = false
+@include_foundation = false
+@include_doorkeeper = false
+@include_devise = false
+@ember_cli_rails = false
+@include_test_models = false
+@include_docker = false
+
+
+@include_sprig = yes?('Include sprig?')
+
+if @type.eql?(:app)
+  #@include_bootstrap = yes?('Include bootstrap?')
+  @include_foundation = yes?('Include foundation?')
+  @include_doorkeeper = yes?('Include doorkeeper?')
+  @include_devise = yes?('Include devise?')
+  @ember_cli_rails = yes?('Use ember-cli-rails?')
+  @include_test_models = yes?('Include test models?')
+  @include_docker = yes?('Include docker?')
+end
+
 
 # rails plugin new ezlink --mountable --skip-test-unit --dummy-path=spec/dummy -m ../rails-templates/template.rb
 # See: https://quickleft.com/blog/rails-application-templates/
@@ -42,32 +68,6 @@ gem_group :development, :test do
   gem 'dotenv-rails'
   gem 'database_cleaner'
 end
-
-@github_username = ask('github user name')
-@github_reponame = ask('github repo name')
-
-@include_sprig = false
-@include_bootstrap = false
-@include_foundation = false
-@include_doorkeeper = false
-@include_devise = false
-@ember_cli_rails = false
-@include_test_models = false
-@include_docker = false
-
-
-@include_sprig = yes?('Include sprig?')
-
-if type.eql?(:app)
-  #@include_bootstrap = yes?('Include bootstrap?')
-  @include_foundation = yes?('Include foundation?')
-  @include_doorkeeper = yes?('Include doorkeeper?')
-  @include_devise = yes?('Include devise?')
-  @ember_cli_rails = yes?('Use ember-cli-rails?')
-  @include_test_models = yes?('Include test models?')
-  @include_docker = yes?('Include docker?')
-end
-
 
 gem 'twitter-bootstrap-rails' if @include_bootstrap
 gem 'foundation-rails', '5.5.2.1' if @include_foundation
@@ -110,15 +110,15 @@ copy_file 'Dockerfile' if @include_docker
 
 # Remove turbolinks
 gsub_file 'Gemfile', /gem 'turbolinks'/, ''
-gsub_file("#{base_dir}app/assets/javascripts/application.js", /\/\/= require turbolinks/, '')
+gsub_file("#{@base_dir}app/assets/javascripts/application.js", /\/\/= require turbolinks/, '')
 
 # Run livereload in development
 # FIXME: Not working with engine
-if type.eql?(:app)
+if @type.eql?(:app)
   environment 'config.middleware.use Rack::LiveReload', env: 'development'
-elsif type.eql?(:plugin)
-  Dir.mkdir('db')
-  File.touch('db/seeds.rb')
+elsif @type.eql?(:plugin)
+  FileUtils.mkdir('../../db')
+  FileUtils.touch('../../db/seeds.rb')
 end
 
 if @include_sprig
@@ -143,15 +143,15 @@ copy_file 'Guardfile'
 copy_file 'Procfile'
 template 'circle.yml', 'circle.yml'
 copy_file 'rubocop.yml', '.rubocop.yml'
-copy_file 'ci.rake', "#{base_dir}lib/tasks/ci.rake"
-template 'env', "#{base_dir}.env"
-remove_file "#{base_dir}config/database.yml"
-copy_file 'database.yml', "#{base_dir}config/database.yml"
-copy_file 'db.rake', "#{base_dir}lib/tasks/db.rake"
+copy_file 'ci.rake', "#{@base_dir}lib/tasks/ci.rake"
+template 'env', "#{@base_dir}.env"
+remove_file "#{@base_dir}config/database.yml"
+copy_file 'database.yml', "#{@base_dir}config/database.yml"
+copy_file 'db.rake', "#{@base_dir}lib/tasks/db.rake"
 
-if type.eql?(:plugin)
+if @type.eql?(:plugin)
   copy_file 'spring.rb', 'config/spring.rb'
-  File.touch 'config/environment.rb'
+  FileUtils.touch '../../config/environment.rb'
 
 =begin
 # into config/application.rb
@@ -193,9 +193,9 @@ inside '.' do
   git :init
   append_file '.gitignore', "project.tags\n"
   append_file '.gitignore', ".env\n"
-  append_file('.gitignore', "config/environment.rb\n") if type.eql?(:plugin)
+  append_file('.gitignore', "config/environment.rb\n") if @type.eql?(:plugin)
   # TODO: test copy_file and change to template so to add the app: when a plugin
-  copy_file '.git/hooks/pre-commit', 'pre-commit'
+  copy_file 'pre-commit', '.git/hooks/pre-commit'
   git remote: "add origin git@github.com:#{@github_username}/#{@github_reponame}.git"
   generate('rspec:install')
   if @include_doorkeeper
