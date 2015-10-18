@@ -150,6 +150,7 @@ copy_file 'database.yml', "#{@base_dir}config/database.yml"
 copy_file 'db.rake', "#{@base_dir}lib/tasks/db.rake"
 
 if @type.eql?(:plugin)
+  # See: https://github.com/rails/spring/issues/323#ref-issue-54884721
   copy_file 'spring.rb', 'config/spring.rb'
   FileUtils.touch '../../config/environment.rb'
   FileUtils.touch 'db/seeds.rb'
@@ -256,6 +257,10 @@ RUBY
     generate :scaffold, 'blog', 'title:string', 'content:string'
     rake 'db:migrate db:test:prepare'
   end
+
+  # NOTE: Enable spring to run rails server
+  # See: https://github.com/rails/spring/issues/323#ref-issue-54884721
+  FileUtils.touch("#{@base_dir}Gemfile") if @type.eql?(:plugin)
 
   git add: '.'
   git commit: %Q{ -m 'Initial commit' }
