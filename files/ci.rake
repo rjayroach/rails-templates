@@ -12,7 +12,7 @@ begin
 
     def patterns_for_changed_files
       # always include the ci.rake file, if the patterns is empty it runs everything
-      patterns = ['lib/tasks/ci.rake']
+      patterns = ['<%= @base_dir %>lib/tasks/ci.rake']
       patterns + changed_files - ['db/schema.rb']
     end
 

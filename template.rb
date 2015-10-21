@@ -142,7 +142,7 @@ copy_file 'Guardfile'
 copy_file 'Procfile'
 template 'circle.yml', 'circle.yml'
 copy_file 'rubocop.yml', '.rubocop.yml'
-copy_file 'ci.rake', "#{@base_dir}lib/tasks/ci.rake"
+template 'ci.rake', "#{@base_dir}lib/tasks/ci.rake"
 template 'env', "#{@base_dir}.env.local.sample"
 remove_file "#{@base_dir}config/database.yml"
 copy_file 'database.yml', "#{@base_dir}config/database.yml"
