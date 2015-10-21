@@ -132,7 +132,6 @@ end
 if Rails.env.eql? 'development'
   sprig [
   ]
- end
 end
 RUBY
   end
@@ -144,7 +143,7 @@ copy_file 'Procfile'
 template 'circle.yml', 'circle.yml'
 copy_file 'rubocop.yml', '.rubocop.yml'
 copy_file 'ci.rake', "#{@base_dir}lib/tasks/ci.rake"
-template 'env', "#{@base_dir}.env"
+template 'env', "#{@base_dir}.env.local.sample"
 remove_file "#{@base_dir}config/database.yml"
 copy_file 'database.yml', "#{@base_dir}config/database.yml"
 copy_file 'db.rake', "#{@base_dir}lib/tasks/db.rake"
@@ -196,6 +195,7 @@ inside '.' do
   git :init
   append_file '.gitignore', "project.tags\n"
   append_file '.gitignore', ".env\n"
+  append_file '.gitignore', ".env.local\n"
   append_file('.gitignore', "config/environment.rb\n") if @type.eql?(:plugin)
   # TODO: test copy_file and change to template so to add the app: when a plugin
   copy_file 'pre-commit', '.git/hooks/pre-commit'
