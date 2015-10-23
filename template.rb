@@ -196,6 +196,7 @@ inside '.' do
   append_file '.gitignore', "project.tags\n"
   append_file '.gitignore', ".env\n"
   append_file '.gitignore', ".env.local\n"
+  append_file '.gitignore', "spec/dummy/Gemfile.lock\n"
   append_file('.gitignore', "config/environment.rb\n") if @type.eql?(:plugin)
   # TODO: test copy_file and change to template so to add the app: when a plugin
   copy_file 'pre-commit', '.git/hooks/pre-commit'
