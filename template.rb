@@ -149,11 +149,22 @@ copy_file 'database.yml', "#{@base_dir}config/database.yml"
 copy_file 'db.rake', "#{@base_dir}lib/tasks/db.rake"
 
 if @type.eql?(:plugin)
+  # Replace route with app_name in spec/dummy/config/routes.rb to mount Xyz::Engine => '/'
+  gsub_file("#{@base_dir}/config/routes.rb", @app_name, '')
+  # Rename Application::Dummy to app name
+  gsub_file("#{@base_dir}/config/application.rb", 'Dummy', @app_name.classify)
+
+  # TODO: This could be moved into perx common since it is kind of perx specific
+  # Remove unnecessary directories
+  %w(views assets helpers mailers).each do |resource|
+    FileUtils.rm_rf("#{@app_path}/app/#{resource}")
+  end
+
   # See: https://github.com/rails/spring/issues/323#ref-issue-54884721
-  copy_file 'spring.rb', 'config/spring.rb'
-  FileUtils.touch '../../config/environment.rb'
-  FileUtils.touch 'db/seeds.rb'
-  append_file 'spec/dummy/db/seeds.rb', "#{@app_name.capitalize}::Engine.load_seed\n"
+  copy_file('spring.rb', 'config/spring.rb')
+  FileUtils.touch('../../config/environment.rb')
+  FileUtils.touch('db/seeds.rb')
+  append_file('spec/dummy/db/seeds.rb', "#{@app_name.capitalize}::Engine.load_seed\n")
 
 =begin
 # into config/application.rb
@@ -162,6 +173,7 @@ if @type.eql?(:plugin)
   g.stylesheets     false
   g.javascripts     false
 =end
+
 
   inject_into_file "lib/#{@app_name}/engine.rb", after: "isolate_namespace #{@app_name.capitalize}\n" do <<-'RUBY'
 
@@ -200,6 +212,7 @@ inside '.' do
   append_file('.gitignore', "config/environment.rb\n") if @type.eql?(:plugin)
   # TODO: test copy_file and change to template so to add the app: when a plugin
   copy_file 'pre-commit', '.git/hooks/pre-commit'
+  system 'chmod +x .git/hooks/pre-commit'
   git remote: "add origin git@github.com:#{@github_username}/#{@github_reponame}.git"
   generate('rspec:install')
   if @include_doorkeeper

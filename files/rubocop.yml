@@ -4,6 +4,7 @@ AllCops:
     - bin/**/*
     - Guardfile
     - spec/spec_helper.rb
+    - spec/dummy/bin/*
   RunRailsCops: true
 Documentation:
   Enabled: false
