@@ -5,6 +5,7 @@ AllCops:
     - Guardfile
     - spec/spec_helper.rb
     - spec/dummy/bin/*
+    - spec/dummy/db/schema.rb
   RunRailsCops: true
 Documentation:
   Enabled: false
