@@ -13,7 +13,7 @@ begin
     def patterns_for_changed_files
       # always include the ci.rake file, if the patterns is empty it runs everything
       patterns = ['<%= @base_dir %>lib/tasks/ci.rake']
-      patterns + changed_files - ['db/schema.rb']
+      patterns + changed_files - ['<%= @base_dir %>db/schema.rb']
     end
 
     desc 'Run RuboCop on the entire project'

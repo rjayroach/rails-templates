@@ -143,7 +143,7 @@ copy_file 'Procfile'
 template 'circle.yml', 'circle.yml'
 copy_file 'rubocop.yml', '.rubocop.yml'
 template 'ci.rake', "#{@base_dir}lib/tasks/ci.rake"
-template 'env', "#{@base_dir}.env.local.sample"
+template 'env', "#{@base_dir}.env.local.example"
 remove_file "#{@base_dir}config/database.yml"
 copy_file 'database.yml', "#{@base_dir}config/database.yml"
 copy_file 'db.rake', "#{@base_dir}lib/tasks/db.rake"
@@ -164,7 +164,7 @@ if @type.eql?(:plugin)
   copy_file('spring.rb', 'config/spring.rb')
   FileUtils.touch('../../config/environment.rb')
   FileUtils.touch('db/seeds.rb')
-  append_file('spec/dummy/db/seeds.rb', "#{@app_name.capitalize}::Engine.load_seed\n")
+  append_file('spec/dummy/db/seeds.rb', "#{@app_name.classify}::Engine.load_seed\n")
 
 =begin
 # into config/application.rb
@@ -240,14 +240,14 @@ RUBY
 
   config.before(:suite) do
     begin
-      DatabaseCleaner.strategy = :transaction
-      DatabaseCleaner.clean_with(:truncation)
       # See: http://www.rubydoc.info/gems/factory_girl/file/GETTING_STARTED.md
-      # DatabaseCleaner.start
+      DatabaseCleaner.start
       FactoryGirl.lint
     ensure
       DatabaseCleaner.clean
     end
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation)
   end
 
   config.around(:each) do |example|
@@ -277,6 +277,6 @@ RUBY
   FileUtils.touch("#{@base_dir}Gemfile") if @type.eql?(:plugin)
 
   git add: '.'
-  git commit: %Q{ -m 'Initial commit' }
+  git commit: %Q{ -n -m 'Initial commit' }
 end
 end
