@@ -9,3 +9,7 @@ $ rails new blog -m https://raw.githubusercontent.com/rjayroach/rails-templates/
 ```bash
 $ bin/rake rails:template LOCATION=https://raw.githubusercontent.com/rjayroach/rails-templates/master/template.rb
 ```
+
+```bash
+$ rails new simple-rails  -d postgresql --api -m https://raw.githubusercontent.com/rjayroach/rails-templates/master/template-api.rb
+```

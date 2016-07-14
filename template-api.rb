@@ -2,7 +2,7 @@
 gem 'pry-rails'
 gem 'awesome_print'
 gem 'pg'
-gem 'jsonapi-resources'
+gem 'jsonapi-resources', '~> 0.7.1.beta2'
 
 gem_group :development do
   gem 'rspec-rails'
