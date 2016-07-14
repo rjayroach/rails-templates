@@ -110,7 +110,7 @@ copy_file 'Dockerfile' if @include_docker
 
 # Remove turbolinks
 gsub_file 'Gemfile', /gem 'turbolinks'/, ''
-gsub_file("#{@base_dir}app/assets/javascripts/application.js", /\/\/= require turbolinks/, '')
+gsub_file("#{@base_dir}app/assets/javascripts/application.js", /\/\/= require turbolinks/, '') if File.exist? "#{@base_dir}app/assets/javascripts/application.js"
 
 # Run livereload in development
 # FIXME: Not working with engine
