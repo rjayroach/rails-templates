@@ -12,6 +12,7 @@ apply('common.rb')
 # apply('api-gems.rb') # Create Gemfile from scratch
 apply('pg.rb')       # config/database.yml
 apply('cors.rb')     # config/initializers/cors.rb
+apply('rspec.rb')    # spec/rails_helper.rb
 
 # JR directory
 empty_directory 'app/resources'
