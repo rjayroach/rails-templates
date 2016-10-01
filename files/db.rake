@@ -1,23 +1,31 @@
 namespace :db do
-  namespace :migrate do
+  desc 'Truncate all existing data in all schemas'
+  task clean: [:environment] do
+    DatabaseCleaner.strategy = :truncation #, {cache_tables: false}
+    # tld = ENV['APPLICATION_NAME'].classify.constantize
+    # (tld::Tenant.all.map(&:schema_name) << 'public').each do |schema_name|
+    #  Apartment::Tenant.switch!(schema_name)
+      DatabaseCleaner.clean
+    # end
+    Rake::Task['db:environment:set'].invoke #() RAILS_ENV=development
+  end
+
+  namespace :clean do
     desc 'Run all migrations against a clean (new) database'
-    task clean: [:environment] do
-      Rake::Task['db:drop'].invoke
-      Rake::Task['db:create'].invoke
+    task migrate: ['db:drop', 'db:create'] do
       Rake::Task['db:migrate'].invoke
+    end
+
+    desc 'Run all migrations against a clean (new) database AND seed it'
+    task seed: [:clean] do
       Rake::Task['db:seed'].invoke
     end
-  end
 
-  desc 'Truncate all existing data'
-  task truncate: [:environment] do
-    DatabaseCleaner.clean_with :truncation
-  end
-
-  namespace :seed do
-    desc 'Truncate all existing data and run seeds'
-    task clean: ['db:truncate'] do
-      Rake::Task['db:seed'].invoke
+    namespace :migrate do
+      desc 'Truncate all existing data and run seeds'
+      task seed: ['db:clean:migrate'] do
+        Rake::Task['db:seed'].invoke
+      end
     end
   end
 end

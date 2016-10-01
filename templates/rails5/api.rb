@@ -9,7 +9,6 @@ end
 # Common template
 apply('common.rb')
 
-
 apply('api-gems.rb') # Create Gemfile from scratch
 apply('pg.rb')       # config/database.yml
 apply('cors.rb')     # config/initializers/cors.rb
@@ -17,11 +16,15 @@ apply('cors.rb')     # config/initializers/cors.rb
 # JR directory
 empty_directory 'app/resources'
 
+# Project Root files
 copy_file 'Guardfile'
 copy_file 'Procfile'
 copy_file 'rubocop.yml', '.rubocop.yml'
 copy_file 'pryrc', '.pryrc'
 template 'circle.yml', 'circle.yml'
+
+# Rake task files
+copy_file 'db.rake', 'lib/tasks/db.rake'
 
 remove_dir 'test'
 
