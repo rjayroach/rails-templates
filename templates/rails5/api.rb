@@ -9,7 +9,7 @@ end
 # Common template
 apply('common.rb')
 
-apply('api-gems.rb') # Create Gemfile from scratch
+# apply('api-gems.rb') # Create Gemfile from scratch
 apply('pg.rb')       # config/database.yml
 apply('cors.rb')     # config/initializers/cors.rb
 
@@ -17,6 +17,8 @@ apply('cors.rb')     # config/initializers/cors.rb
 empty_directory 'app/resources'
 
 # Project Root files
+remove_file 'Gemfile'
+copy_file 'Gemfile.api', 'Gemfile'
 copy_file 'Guardfile'
 copy_file 'Procfile'
 copy_file 'rubocop.yml', '.rubocop.yml'
