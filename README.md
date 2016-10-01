@@ -13,3 +13,7 @@ $ bin/rake rails:template LOCATION=https://raw.githubusercontent.com/rjayroach/r
 ```bash
 $ rails new simple-rails --api -m https://raw.githubusercontent.com/rjayroach/rails-templates/master/templates/rails5/api.rb
 ```
+
+```bash
+$ rails new simple-rails --api -m ~/path-to/rails-templates/templates/rails5/api.rb
+```
