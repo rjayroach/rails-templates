@@ -1,3 +1,4 @@
+generate 'rspec:install'
 
 inject_into_file 'spec/rails_helper.rb', after: "Rails is not loaded until this point!\n" do <<-'RUBY'
 require 'pry'

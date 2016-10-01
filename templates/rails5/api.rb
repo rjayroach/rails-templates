@@ -8,11 +8,12 @@ end
 
 # Common template
 apply('common.rb')
+git :init
 
 # apply('api-gems.rb') # Create Gemfile from scratch
 apply('pg.rb')       # config/database.yml
 apply('cors.rb')     # config/initializers/cors.rb
-apply('rspec.rb')    # spec/rails_helper.rb
+apply('guard.rb')    # Guardfile
 
 # JR directory
 empty_directory 'app/resources'
@@ -20,7 +21,6 @@ empty_directory 'app/resources'
 # Project Root files
 remove_file 'Gemfile'
 copy_file 'Gemfile.api', 'Gemfile'
-copy_file 'Guardfile'
 copy_file 'Procfile'
 copy_file 'rubocop.yml', '.rubocop.yml'
 copy_file 'pryrc', '.pryrc'
@@ -45,7 +45,7 @@ after_bundle do
   end
 
   run 'spring stop'
-  generate 'rspec:install'
+  apply('rspec.rb')    # spec/rails_helper.rb
 
   insert_into_file 'app/controllers/application_controller.rb', after: "ActionController::API\n" do <<-RUBY
   include JSONAPI::ActsAsResourceController
@@ -57,12 +57,9 @@ after_bundle do
   RUBY
   end
 
-
   # Health Check route
   # generate(:controller, 'health index')
   # route "root to: 'health#index'"
 
-  git :init
-  git add: '.'
-  git commit: "-a -m 'Initial commit'"
+  apply('git.rb')
 end
