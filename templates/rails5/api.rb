@@ -29,6 +29,10 @@ template 'circle.yml', 'circle.yml'
 # Rake task files
 copy_file 'db.rake', 'lib/tasks/db.rake'
 
+# Initializers
+copy_file 'jsonapi_resources.rb', 'config/initializers'
+
+
 remove_dir 'test'
 
 after_bundle do
