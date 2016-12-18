@@ -30,7 +30,7 @@ template 'circle.yml', 'circle.yml'
 copy_file 'db.rake', 'lib/tasks/db.rake'
 
 # Initializers
-copy_file 'jsonapi_resources.rb', 'config/initializers'
+copy_file 'jsonapi_resources.rb', 'config/initializers/jsonapi_resources.rb'
 
 
 remove_dir 'test'
@@ -50,20 +50,6 @@ after_bundle do
 
   run 'spring stop'
   apply('rspec.rb')    # spec/rails_helper.rb
-
-  insert_into_file 'app/controllers/application_controller.rb', after: "ActionController::API\n" do <<-RUBY
-  include JSONAPI::ActsAsResourceController
-
-  # Prevent CSRF attacks by raising an exception.
-  # For APIs, you may want to use :null_session instead.
-  # NOTE: This throws an exception:
-  # protect_from_forgery with: :null_session
-  RUBY
-  end
-
-  # Health Check route
-  # generate(:controller, 'health index')
-  # route "root to: 'health#index'"
-
+  apply('controllers.rb')
   apply('git.rb')
 end

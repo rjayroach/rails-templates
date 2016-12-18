@@ -1,3 +1,4 @@
 gem 'devise'
 
-@docker_account = ask('docker account')
+@type = :app
+@type = :plugin if @app_name.nil?

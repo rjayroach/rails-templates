@@ -1,23 +1,29 @@
-FROM ruby:2.2
-RUN apt-get update && apt-get install mysql-client --yes && apt-get clean
-RUN mkdir -p /app/vendor/cache
-WORKDIR /app
-COPY Gemfile* /app/
-COPY vendor/cache vendor/cache/
-RUN bundle install --local --without development:test --deployment
-COPY . /app
-RUN bundle exec rake assets:precompile
+FROM ruby:2.3.3
+RUN apt-get update && apt-get install sudo vim tree less postgresql-contrib postgresql-client --yes --no-install-recommends && apt-get clean
+RUN touch /usr/local/bundle/config && chmod a+w /usr/local/bundle/config && \
+  useradd -ms /bin/bash rails && echo 'rails ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
+  mkdir -p /home/rails/gems /home/rails/app/vendor/cache && \
+  echo 'set editing-mode vi' > /home/rails/.inputrc && \
+  chown -R rails:rails /home/rails
+
+USER rails
+ENV HOME /home/rails
+WORKDIR /home/rails/app
+
+COPY Gemfile* /home/rails/app/
+RUN bundle install #--local --path /home/rails/gems --without development:test --deployment
+
+# Copy in the application code
+COPY . /home/rails/app
+RUN sudo chown -R rails:rails /home/rails
+
+# What port to run on
+# TODO ADD ENV TERM=xterm
+ENV RAILS_ENV production
 EXPOSE 3000
-CMD bundle exec rackup -p 3000 -o 0.0.0.0
 
-# Before running docker build
-# bundle package --all
-
-# Build the container
-# docker build -t rjayroach/dashboard .
-
-# Run the container on dev machine connecting to dashboard_development database on localhost
-# docker run -i -t --rm --name dashboard -e RAILS_ENV=development -e DATABASE_HOST=172.17.42.1 -e DATABASE_NAME=dashboard_development -e DATABASE_USER=perx -e DATABASE_PASSWORD=12345 -p 3000:3000 rjayroach/dashboard
-
-# Push the container
-# docker push
+# Boot the application; Override this from the command line in order to run other tools
+# docker run --env-file .env -e APPLICATION_NAME=device -e API_HOST=172.17.0.1 -e WORKERS=Device::NotificationWorker quay.io/getperx/device  bundle exec rake sneakers:run
+# CMD bundle exec rackup -p 3000 -o 0.0.0.0
+RUN mkdir -p tmp/pids && ln -s /home/rails/app/aliases /home/rails/.bash_aliases
+CMD bundle exec puma config.ru
