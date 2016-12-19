@@ -17,9 +17,8 @@ RUN bundle install #--local --path /home/rails/gems --without development:test -
 COPY . /home/rails/app
 RUN sudo chown -R rails:rails /home/rails
 
+ENV RAILS_ENV production TERM=xterm
 # What port to run on
-# TODO ADD ENV TERM=xterm
-ENV RAILS_ENV production
 EXPOSE 3000
 
 # Boot the application; Override this from the command line in order to run other tools
