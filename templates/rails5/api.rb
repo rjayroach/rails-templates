@@ -25,6 +25,7 @@ copy_file 'Procfile'
 copy_file 'rubocop.yml', '.rubocop.yml'
 copy_file 'pryrc', '.pryrc'
 template 'circle.yml', 'circle.yml'
+template 'tmuxinator.yml', '.tmuxinator.yml'
 
 # Rake task files
 copy_file 'db.rake', 'lib/tasks/db.rake'
