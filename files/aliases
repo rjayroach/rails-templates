@@ -1,0 +1,2 @@
+alias rc='bundle exec rails console'
+alias rk='bundle exec rake'
