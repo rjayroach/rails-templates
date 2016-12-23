@@ -16,11 +16,11 @@ default: &default
 
 development:
   <<: *default
-  database: <%= ENV['DATABASE_NAME'] || '#{app_name}' %>_development
+  database: <%= ENV['DATABASE_NAME'] || '#{app_name.tr('-', '_')}' %>_development
 
 test:
   <<: *default
-  database: <%= ENV['DATABASE_NAME'] || '#{app_name}' %>_test
+  database: <%= ENV['DATABASE_NAME'] || '#{app_name.tr('-', '_')}' %>_test
 
 production:
   <<: *default
