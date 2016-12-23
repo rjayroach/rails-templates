@@ -17,7 +17,7 @@ RUN bundle install #--local --path /home/rails/gems --without development:test -
 COPY . /home/rails/app
 RUN sudo chown -R rails:rails /home/rails
 
-ENV RAILS_ENV production TERM=xterm RAILS_LOG_TO_STDOUT=yes
+ENV RAILS_ENV=production TERM=xterm RAILS_LOG_TO_STDOUT=yes
 # What port to run on
 EXPOSE 3000
 
