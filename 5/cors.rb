@@ -1,3 +1,5 @@
+gem 'rack-cors'
+
 inside 'config/initializers' do
   remove_file 'cors.rb'
   create_file 'cors.rb' do <<-EOF

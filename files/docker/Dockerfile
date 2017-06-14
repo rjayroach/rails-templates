@@ -1,4 +1,4 @@
-FROM ruby:2.3.3
+FROM ruby:2.4.1
 RUN apt-get update && apt-get install sudo vim tree less postgresql-contrib postgresql-client --yes --no-install-recommends && apt-get clean
 RUN touch /usr/local/bundle/config && chmod a+w /usr/local/bundle/config && \
   useradd -ms /bin/bash rails && echo 'rails ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
@@ -24,5 +24,5 @@ EXPOSE 3000
 # Boot the application; Override this from the command line in order to run other tools
 # docker run --env-file .env -e APPLICATION_NAME=device -e API_HOST=172.17.0.1 -e WORKERS=Device::NotificationWorker quay.io/getperx/device  bundle exec rake sneakers:run
 # CMD bundle exec rackup -p 3000 -o 0.0.0.0
-RUN mkdir -p tmp/pids && ln -s /home/rails/app/aliases /home/rails/.bash_aliases
+RUN mkdir -p tmp/pids && ln -s /home/rails/app/.aliases /home/rails/.bash_aliases
 CMD bundle exec puma config.ru

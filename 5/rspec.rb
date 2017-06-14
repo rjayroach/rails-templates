@@ -1,9 +1,12 @@
 generate 'rspec:install'
 
+empty_directory 'spec/support'
+
 inject_into_file 'spec/rails_helper.rb', after: "Rails is not loaded until this point!\n" do <<-'RUBY'
 require 'pry'
-Dir[Rails.root.join('../..', 'spec/support/**/*.rb')].each { |f| require f }
-Dir[Rails.root.join('../..', 'spec/factories/**/*.rb')].each { |f| require f }
+require 'factory_girl'
+Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
+Dir[Rails.root.join('spec', 'factories', '**', '*.rb')].each { |f| require f }
 RUBY
 end
 

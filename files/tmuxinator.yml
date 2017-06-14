@@ -1,37 +1,31 @@
-name: <%= @app_name %> # rapi
-root: <%= @project_dir %> #~/recheck
+name: <%= @app_name %>
+root: <%= @parent_dir %>
 
 windows:
   - console:
       layout: main-vertical
-      root: <%= "#{@project_dir}/#{@app_name}" %> #~/recheck/rapi
+      root: <%= "#{@parent_dir}/#{@app_name}" %>
       panes:
         - rails console
         - pwd
   - servers:
       layout: main-vertical
-      root: <%= @project_dir %>
+      root: <%= @parent_dir %>
       panes:
-        - cd rapi && rails server -b 0.0.0.0
+        - cd <%= @app_name %> && rails server -b 0.0.0.0
         - cd recheck-web && ember serve
   - rails:
       layout: main-horizontal
-      root: ~/recheck/rapi
+      root: <%= "#{@parent_dir}/#{@app_name}" %>
       panes:
         - pwd
   - ember:
       layout: main-horizontal
-      root: ~/recheck/recheck-web
+      root: <%= "#{@parent_dir}/#{@app_name}" %>
       panes:
         - pwd
   - data:
       layout: main-horizontal
-      root: ~/rhodes/data/recheck
-      root: <%= "#{@project_dir}/data/#{@app_name}" %>
-      panes:
-        - pwd
-  - ansible:
-      layout: main-horizontal
-      root: ~/rhodes/ansible
+      root: ~/prepd/projects/<%= @app_name %>/data
       panes:
         - pwd

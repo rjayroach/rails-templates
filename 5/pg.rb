@@ -1,3 +1,11 @@
+gem 'pg'
+
+append_file '.env', "DATABASE_NAME=#{@app_name}_development\n"
+append_file '.env', "DATABASE_TEST=#{@app_name}_test\n"
+append_file '.env', "DATABASE_HOST=localhost\n"
+append_file '.env', "DATABASE_USERNAME=#{ENV['USER']}\n"
+append_file '.env', "DATABASE_PASSWORD=#{ENV['USER']}\n"
+
 inside 'config' do
   remove_file 'database.yml'
   create_file 'database.yml' do <<-EOF
