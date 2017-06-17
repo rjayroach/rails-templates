@@ -9,6 +9,7 @@ end
 
 apply('common.rb')
 
+asker(:docker, 'Docker?')
 asker(:pg, 'Add postgres?')
 asker(:cors, 'Add CORS?')
 asker(:guard, 'Add Guard?')
@@ -18,20 +19,10 @@ asker(:rspec, 'RSpec?')
 asker(:trailblazer, 'Trailblazer?')
 asker(:exception_notification, 'Exception Notifications?')
 asker(:slack_notifier, 'Slack Notifications?')
+asker(:circleci, 'Circle CI?')
 asker(:devise, 'Devise?')
-asker(:docker, 'Docker?')
 
-
-# Common template
-remove_file 'Gemfile'
-copy_file 'Gemfile.base', 'Gemfile'
-
-# Common Gemfiles
-gem 'dotenv-rails'
-gem 'pry-rails'
-gem 'awesome_print'
-
-apply('tools.rb')
+apply('common_config.rb')
 
 # User Requested Templates
 apply('pg.rb') if @packages.include?(:pg)
@@ -71,20 +62,18 @@ if @packages.include?(:slack_notifier)
   # end
 end
 
-application do <<-RUBY
-config.generators do |g|
-      g.stylesheets false
-      g.javascripts false
-      g.helper false
-      g.template_engine false
-      g.routing_specs false
-    end
-RUBY
+if not plugin?
+  apply('application.rb')
+elsif full? || mountable?
+  apply('plugin.rb')
 end
 
 after_bundle do
-  apply('rspec.rb') if @packages.include?(:rspec)
-  run 'bundle exec rake rubocop:auto_correct'
-  apply('git.rb')
-  run 'spring stop'
+  # wrap with #inside b/c otherwise when a plugin is created pwd is dummy_path
+  inside('.') do
+    apply('rspec.rb') if @packages.include?(:rspec)
+    run 'bundle exec rake rubocop:auto_correct'
+    apply('git.rb')
+    run 'spring stop'
+  end
 end

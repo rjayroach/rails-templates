@@ -1,23 +1,23 @@
 gem 'pg'
 
-append_file '.env', "DATABASE_NAME=#{@app_name}_development\n"
-append_file '.env', "DATABASE_TEST=#{@app_name}_test\n"
+append_file '.env', "DATABASE_NAME=#{@application_name}_development\n"
+append_file '.env', "DATABASE_TEST=#{@application_name}_test\n"
 append_file '.env', "DATABASE_HOST=localhost\n"
 append_file '.env', "DATABASE_USERNAME=#{ENV['USER']}\n"
 append_file '.env', "DATABASE_PASSWORD=#{ENV['USER']}\n"
 
-inside 'config' do
+inside "#{@app_dir}/config" do
   remove_file 'database.yml'
   create_file 'database.yml' do <<-EOF
 default: &default
   adapter: postgresql
   database: <%= ENV['DATABASE_NAME'] %>
   encoding: unicode
-  host: <%= ENV['DATABASE_HOST'] || 'localhost' %>
-  password: <%= ENV['DATABASE_PASSWORD'] || '#{ENV["USER"]}' %>
+  host: <%= ENV['DATABASE_HOST'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
   port: 5432
   timeout: 5000
-  username: <%= ENV['DATABASE_USERNAME'] || '#{ENV["USER"]}' %>
+  username: <%= ENV['DATABASE_USERNAME'] %>
 
   # For details on connection pooling, see rails configuration guide
   # http://guides.rubyonrails.org/configuring.html#database-pooling

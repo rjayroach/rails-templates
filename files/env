@@ -1,4 +1,0 @@
-DATABASE_HOST=localhost
-DATABASE_NAME=<%= "#{@app_name}_development" %>
-DATABASE_PASSWORD=<%= "#{@app_name}" %>
-DATABASE_USERNAME=<%= "#{@app_name}" %>
