@@ -9,23 +9,4 @@ insert_into_file 'config/application.rb', after: "class Application < Rails::App
 RUBY
 end
 
-create_file 'config/fluent-logger.yml' do <<-RUBY
-development:
-  fluent_host:   '127.0.0.1'
-  fluent_port:   24224
-  tag:           'foo'
-  messages_type: 'string'
-
-test:
-  fluent_host:   '127.0.0.1'
-  fluent_port:   24224
-  tag:           'foo'
-  messages_type: 'string'
-
-production:
-  fluent_host:   '127.0.0.1'
-  fluent_port:   24224
-  tag:           'foo'
-  messages_type: 'string'
-RUBY
-end
+copy_file 'fluentd/files/fluent-logger.yml', 'config/fluent-logger.yml'

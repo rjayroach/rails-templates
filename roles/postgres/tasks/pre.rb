@@ -1,5 +1,6 @@
 gem 'pg'
 
+# NOTE: This seems inefficient to do one line at a time, but a block append will not do variable substitution
 append_file '.env', "DATABASE_NAME=#{app.application_name}_development\n"
 append_file '.env', "DATABASE_TEST=#{app.application_name}_test\n"
 append_file '.env', "DATABASE_HOST=localhost\n"

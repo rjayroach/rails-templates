@@ -1,7 +1,0 @@
-web:      bundle exec rails server -b 0.0.0.0 -p 3000
-<% if @packages.include?(:guard) -%>
-guard:    bundle exec guard
-<% end -%>
-<% if @packages.include?(:grpc) -%>
-grpc:     bundle exec rake grpc
-<% end -%>
