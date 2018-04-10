@@ -4,3 +4,7 @@ test
 spec
 .git
 .env*
+Dockerfile*
+Procfile
+README.md
+docker-compose*

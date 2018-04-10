@@ -1,31 +1,27 @@
-name: <%= @app_name.gsub('.', '-') %>
-root: <%= @parent_dir %>
+name: <%= Dir.pwd.split('/').pop(2).join('-') %>
+root: <%= Dir.pwd %>
 
 windows:
   - console:
       layout: main-vertical
-      root: <%= "#{@parent_dir}/#{@app_name}" %>
       panes:
         - rails console
         - pwd
   - servers:
       layout: main-vertical
-      root: <%= @parent_dir %>
       panes:
-        - cd <%= @app_name %> && rails server -b 0.0.0.0
-        - cd recheck-web && ember serve
+        - rails server -b 0.0.0.0
+        - cd ../frontend # && ember serve
   - rails:
       layout: main-horizontal
-      root: <%= "#{@parent_dir}/#{@app_name}" %>
       panes:
         - pwd
   - ember:
       layout: main-horizontal
-      root: <%= "#{@parent_dir}/#{@app_name}" %>
       panes:
-        - pwd
+        - cd ../frontend && pwd
   - data:
       layout: main-horizontal
-      root: ~/prepd/projects/<%= @app_name %>/data
+      root: ~/data/<%= Dir.pwd.split('/').pop(2).first %>
       panes:
         - pwd

@@ -3,3 +3,4 @@
 inside('.') { git :init }
 create_file '.env'
 create_file 'Procfile'
+create_file '.dockerignore' if app.docker?

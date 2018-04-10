@@ -1,10 +1,11 @@
 require_relative 'setup'
 def source_paths; Array(super) + [Pathname.new(template_dir), "#{Pathname.new(template_dir)}/roles"] end
-apply('common.rb')
 
-app.whitelist = %w(config defaults docker)
-app.blacklist = %w(trailblazer rubocop)
+app.whitelist = %w(config defaults git)
+app.blacklist = %w(trailblazer)
 app.ask
+
+apply('common.rb')
 
 app.applied.each do |component|
   next unless File.exists?("#{template_dir}/roles/#{component}/tasks/pre.rb") 
