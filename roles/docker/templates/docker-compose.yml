@@ -42,7 +42,7 @@ services:
     environment:
       RAILS_MAX_THREADS: 10
     command: bundle exec sidekiq -q <%= app.application_name %>_production_default
-<% endif -%>
+<% end -%>
 
 <% if app.grpc? -%>
   grpc:
@@ -52,4 +52,4 @@ services:
     env_file:
       - ./.env
     command: bundle exec rake grpc
-<% endif -%>
+<% end -%>
