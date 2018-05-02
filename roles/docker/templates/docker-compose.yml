@@ -1,48 +1,55 @@
 ---
-version: '2'
+version: '3.6'
 services:
-<% if app.postgres? -%>
-  postgres:
-    image: postgres:9.6.2-alpine
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./docker/redis/data:/data
+
+  app-base:
+    build:
+      context: .
+      target: base
+    image: "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}-base"
+
+  app:
+    build:
+      cache_from:
+        - "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}-base"
+      context: .
+      args:
+        os_packages: libpq5 sqlite3
+    image: "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+    links:
+      - redis
+    ports:
+      - '3000:3000'
     environment:
-      POSTGRES_USER: <%= "#{ENV['USER']}" %>
-      POSTGRES_PASSWORD: <%= "#{ENV['USER']}" %>
-      POSTGRES_DB: <%= "#{app.application_name}_development" %>
-<% end -%>
+      RAILS_SERVE_STATIC_FILES: 1
+      # SCHEDULE_IMPORT_CRON: '* * * * *'
+    env_file:
+      - ./.env
+
+<% if app.sidekiq? -%>
+  sidekiq:
+    image: "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+    links:
+      - redis
+    env_file:
+      - ./.env
+    environment:
+      RAILS_MAX_THREADS: 10
+    command: bundle exec sidekiq -q <%= app.application_name %>_production_default
+<% endif -%>
+
 <% if app.grpc? -%>
   grpc:
-    build: .
+    image: "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+    ports:
+      - '50051:50051'
+    env_file:
+      - ./.env
     command: bundle exec rake grpc
-    # volumes:
-    #   - .:/app
-    ports:
-      - "50051:50051"
-    links:
-<% if app.postgres? -%>
-      - postgres
-<% end -%>
-    environment:
-      DATABASE_HOST: postgres
-      DATABASE_NAME: <%= "#{app.application_name}_development" %>
-      DATABASE_USERNAME: <%= "#{ENV['USER']}" %>
-      DATABASE_PASSWORD: <%= "#{ENV['USER']}" %>
-<% end -%>
-  web:
-    build: .
-    command: bundle exec rails s -b 0.0.0.0
-    # volumes:
-    #   - .:/app
-    ports:
-      - "3000:3000"
-    links:
-<% if app.postgres? -%>
-      - postgres
-<% end -%>
-<% if app.grpc? -%>
-      - grpc
-<% end -%>
-    environment:
-      DATABASE_HOST: postgres
-      DATABASE_NAME: <%= "#{app.application_name}_development" %>
-      DATABASE_USERNAME: <%= "#{ENV['USER']}" %>
-      DATABASE_PASSWORD: <%= "#{ENV['USER']}" %>
+<% endif -%>

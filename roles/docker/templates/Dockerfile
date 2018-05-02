@@ -1,66 +1,65 @@
 # NOTES:
-# to build just the build-stage: docker build --target build-env -t tag_name:build-env .
-# to build the final stage: docker build -t tag_name .
-ARG rails_env = production
+# There are three build arguments which are all set to production values, so to build the production image:
+# docker build -t repo/project:version .
+# To build the development image, pass values for bundle_string, rails_env and os_packages:
+# docker build --build-arg bundle_string='' --build-arg rails_env=development -t repo/project:version-dev .
 
+# Build the 'base' container
+FROM ruby:2.5.1-stretch as base
 
-FROM ruby:2.5.1-stretch as build-stage
-# NOTE: For some reason the user needs to be set in this context as well as in final build context
-RUN useradd -ms /bin/bash rails \
- && mkdir /home/rails/app \
- && chown -R rails:rails /home/rails \
- && chown -R rails /usr/local/bundle
+# WORKDIR needs to be the same as in the final base image or compiled gems will point to an invalid directory
+RUN mkdir -p /home/rails
+WORKDIR /home/rails
 
-# To be more sure that permissions are working, install gems as the user rails
-USER rails:rails
-
+# Install gems that need compiling first b/c they can take a long time to compile
 RUN gem install \
-    msgpack:1.2.4 \
     nokogiri:1.8.2 \
     ffi:1.9.23 \
     nio4r:2.3.0 \
-    puma:3.11.3 \
-    sqlite3:1.3.13 \
-    therubyracer:0.12.3 \
-    grpc grpc-tools protobuf-activerecord \
+    puma:3.11.4 \
+    sqlite3:1.3.13
+
+# Don't use the --deployment flag since this is a container. See: http://bundler.io/man/bundle-install.1.html#DEPLOYMENT-MODE
+COPY Gemfile* ./
+ARG bundle_string='--without development test'
+RUN bundle install ${bundle_string} \
  && find /usr/local/bundle -iname '*.o' -exec rm -rf {} \; \
  && find /usr/local/bundle -iname '*.a' -exec rm -rf {} \;
 
-# NOTE: WORKDIR needs to be the same as in the final base image or compiled gems will point to an invalid directory
-WORKDIR /home/rails/app
-COPY Gemfile ./
-# NOTE: Don't use the --deployment flag since this is a container. See: http://bundler.io/man/bundle-install.1.html#DEPLOYMENT-MODE
-RUN bundle install --without development test
 
-
-# The actual container to be built
+# Runtime container
 FROM ruby:2.5.1-slim-stretch
+COPY --from=base /usr/local/bundle /usr/local/bundle
 
-# Root operations
-RUN apt-get update \
- && apt-get install --yes --no-install-recommends \
-    sqlite3 \
- && apt-get clean \
- && useradd -ms /bin/bash rails \
- && echo 'set editing-mode vi' > /home/rails/.inputrc
+# Install OS packages and create a non-root user to run the application
+# To compile pg gem: libpq-dev
+# To install pg client to run via bash: postgresql-client
+<% if app.postgres? -%>
+ARG os_packages='libpq5'
+<% else -%>
+ARG os_packages='sqlite3'
+<% end -%>
 
-# RUN apt-get update && apt-get install sudo vim tree less postgresql-contrib postgresql-client --yes --no-install-recommends && apt-get clean
-COPY --from=build-stage /usr/local/bundle /usr/local/bundle
+RUN useradd -ms /bin/bash rails \
+ && apt-get update \
+ && apt-get install --yes --no-install-recommends ${os_packages} \
+ && apt-get clean
 
 # Rails operations
-USER rails:rails
-WORKDIR /home/rails/app
+WORKDIR /home/rails
 COPY --chown=rails:rails . ./
 
-# RUN sudo chown -R rails:rails /home/rails && mkdir -p tmp/pids # && ln -s /home/rails/app/aliases /home/rails/.bash_aliases
-# ENV HOME /home/rails RAILS_ENV=production TERM=xterm RAILS_LOG_TO_STDOUT=yes
+# ln -s /home/rails/app/aliases /home/rails/.bash_aliases
+ARG rails_env=production
 ENV RAILS_ENV=${rails_env} TERM=xterm RAILS_LOG_TO_STDOUT=yes
-<% if app.applied.include?(:grpc) -%>
+<% if app.grpc? -%>
 EXPOSE 3000 50051
 <% else -%>
 EXPOSE 3000
 <% end -%>
 
+USER rails:rails
+# RUN bundle exec rails assets:precompile
 # Boot the application; Override this from the command line in order to run other tools
 # docker run --env-file .env -e APPLICATION_NAME=device -e API_HOST=172.17.0.1 -e WORKERS=Device::NotificationWorker quay.io/getperx/device  bundle exec rake sneakers:run
 # CMD bundle exec rackup -p 3000 -o 0.0.0.0

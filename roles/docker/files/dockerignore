@@ -6,5 +6,6 @@ spec
 .env*
 Dockerfile*
 Procfile
+Guardfile
 README.md
 docker-compose*

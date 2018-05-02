@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 def loff
   @old_logger = ActiveRecord::Base.logger
@@ -17,4 +18,5 @@ def r
   reset_memoized
   reload!
 end
+
 loff

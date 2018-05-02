@@ -9,3 +9,5 @@ end
 gem_group :development, :test do
   gem 'database_cleaner'
 end
+
+copy_file 'rspec/files/linter.rb', 'spec/linter.rb'

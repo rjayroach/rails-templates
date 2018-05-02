@@ -2,7 +2,7 @@
 module Custom
   class Application
     attr_reader :parent_dir, :app_dir, :application_name, :controllers_path, :is_plugin, :template_path
-    attr_accessor :selected, :whitelist, :blacklist
+    attr_accessor :selected, :whitelist, :blacklist, :content_files
 
     def method_missing(method_name, *arguments)
       if method_name[-1] == '?'
@@ -30,6 +30,7 @@ module Custom
       @controllers_path = is_plugin ? "app/controllers/#{@name}" : 'app/controllers'
 
       @selected = []
+      @content_files = []
     end
 
     def roles

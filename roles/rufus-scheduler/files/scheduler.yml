@@ -1,0 +1,10 @@
+---
+schedule:
+  - every
+  - in
+  - cron
+
+tasks:
+  import: Repository.read
+  notify: Check.notify
+  report: ReportInterval.process

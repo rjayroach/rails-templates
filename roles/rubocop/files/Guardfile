@@ -1,0 +1,4 @@
+
+guard :rubocop, all_on_start: false, cli: ['--format', 'clang', '--rails'] do
+  watch(%r{^(.+)\.rb$})
+end

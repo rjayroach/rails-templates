@@ -1,5 +1,5 @@
 
-insert_into_file "lib/#{@name}/engine.rb", after: "class Engine < ::Rails::Engine\n" do <<-RUBY
+insert_into_file "lib/#{app.application_name}/engine.rb", after: "class Engine < ::Rails::Engine\n" do <<-RUBY
     config.generators do |g|
       g.stylesheets false
       g.javascripts false
@@ -16,8 +16,8 @@ run 'ln -s ../../.env'
 # See: https://github.com/rails/spring/issues/323#ref-issue-54884721
 template 'defaults/spring.rb', 'config/spring.rb'
 
-if @packages.include?(:rspec)
-  insert_into_file "lib/#{@name}/engine.rb", after: "class Engine < ::Rails::Engine\n" do <<-RUBY
+if app.rspec?
+  insert_into_file "lib/#{app.application_name}/engine.rb", after: "class Engine < ::Rails::Engine\n" do <<-RUBY
     config.generators do |g|
       g.test_framework :rspec, fixture: false
       g.fixture_replacement :factory_bot, dir: 'spec/factories'

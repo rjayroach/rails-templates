@@ -26,7 +26,8 @@ inject_into_file 'spec/rails_helper.rb', after: "config.infer_spec_type_from_fil
     begin
       # See: http://www.rubydoc.info/gems/factory_bot/file/GETTING_STARTED.md
       DatabaseCleaner.start
-      FactoryBot.lint
+      # Save a lot of time by skipping linting factories when running just one spec file
+      # FactoryBot.lint unless config.files_to_run.one?
     ensure
       DatabaseCleaner.clean
     end
@@ -41,3 +42,5 @@ inject_into_file 'spec/rails_helper.rb', after: "config.infer_spec_type_from_fil
   end
 RUBY
 end
+
+append_file '.pryrc', "FB = FactoryBot if Rails.env.development?\n"
