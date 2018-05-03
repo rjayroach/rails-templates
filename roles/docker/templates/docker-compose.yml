@@ -31,25 +31,3 @@ services:
       # SCHEDULE_IMPORT_CRON: '* * * * *'
     env_file:
       - ./.env
-
-<% if app.sidekiq? -%>
-  sidekiq:
-    image: "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
-    links:
-      - redis
-    env_file:
-      - ./.env
-    environment:
-      RAILS_MAX_THREADS: 10
-    command: bundle exec sidekiq -q <%= app.application_name %>_production_default
-<% end -%>
-
-<% if app.grpc? -%>
-  grpc:
-    image: "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
-    ports:
-      - '50051:50051'
-    env_file:
-      - ./.env
-    command: bundle exec rake grpc
-<% end -%>
