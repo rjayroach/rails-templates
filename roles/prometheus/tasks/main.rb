@@ -6,7 +6,8 @@ if app.docker?
     ports:
       - '9090:9090'
     volumes:
-      - ./docker/prometheus/data:/prometheus
+      - '/tmp/${COMPOSE_PROJECT_NAME}/prometheus/data:/prometheus'
+      - './prometheus.yml:/etc/prometheus/prometheus.yml'
 
   RUBY
   end

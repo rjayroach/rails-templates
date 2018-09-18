@@ -7,7 +7,7 @@ if app.docker?
       - '24224:24224'
       - '24224:24224/udp'
     volumes:
-      - ./docker/fluentd/data:/fluentd/log
+      - /tmp/${COMPOSE_PROJECT_NAME}/fluentd/log:/fluentd/log
 
   RUBY
   end

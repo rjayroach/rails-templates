@@ -1,0 +1,24 @@
+---
+microservice:
+  whitelist:
+    - config
+    - defaults
+    - docker
+    - fluentd
+    - git
+    - postgres
+    - prometheus
+    - circleci
+    - cors
+    - guard
+    - jsonapi
+    - rspec
+    - rubocop
+    - rufus-scheduler
+    - sidekiq
+  blacklist:
+    - devise
+    - exception_notification
+    - grpc
+    - slack-notifier
+    - trailblazer

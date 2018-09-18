@@ -1,17 +1,18 @@
 development:
-  fluent_host:   '127.0.0.1'
+  fluent_host:   <%= ENV['FLUENTD_HOST'] %>
   fluent_port:   24224
-  tag:           'foo'
+  tag:           <%= ENV['FLUENTD_TAG'] %>
   messages_type: 'string'
 
 test:
-  fluent_host:   '127.0.0.1'
+  fluent_host:   <%= ENV['FLUENTD_HOST'] %>
   fluent_port:   24224
-  tag:           'foo'
+  tag:           <%= ENV['FLUENTD_TAG'] %>
   messages_type: 'string'
 
 production:
-  fluent_host:   '127.0.0.1'
+  fluent_host:   <%= ENV['FLUENTD_HOST'] %>
   fluent_port:   24224
-  tag:           'foo'
+  tag:           <%= ENV['FLUENTD_TAG'] %>
   messages_type: 'string'
+

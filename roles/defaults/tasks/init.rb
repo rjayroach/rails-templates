@@ -6,6 +6,7 @@ gem 'awesome_print'
 
 gem_group :development, :test do
   gem 'brakeman', require: false
+  gem 'pry-byebug'
 end
 
 app.content_files << 'README.md'

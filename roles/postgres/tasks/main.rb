@@ -10,7 +10,7 @@ if app.docker?
     ports:
       - '5432:5432'
     volumes:
-      - ./docker/postgres/data:/var/lib/postgresql/data
+      - '/tmp/${COMPOSE_PROJECT_NAME}/docker/postgres/data:/var/lib/postgresql/data'
 
   app:
     links:
