@@ -1,12 +1,10 @@
 
 # Common Gemfiles
-gem 'dotenv-rails'
-gem 'pry-rails'
-gem 'awesome_print'
+# gem 'dotenv-rails'
 
-gem_group :development, :test do
-  gem 'brakeman', require: false
-  gem 'pry-byebug'
+app.gem_group :development, :test do
+  app.gem 'brakeman', require: false
+  app.gem 'pry-byebug'
 end
 
 app.content_files << 'README.md'

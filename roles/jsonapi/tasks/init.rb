@@ -1,4 +1,5 @@
-gem 'jsonapi-resources'
+app.gem 'jsonapi-resources', '0.10.0.beta1'
+app.gem 'rails-html-sanitizer'
 
 # JR directory
 empty_directory 'app/resources'

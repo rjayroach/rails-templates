@@ -1,7 +1,7 @@
 # rubocop/tasks/init.rb
 
-gem_group :development, :test do
-  gem 'rubocop', require: false
+app.gem_group :development, :test do
+  app.gem 'rubocop', require: false
 end
 
 copy_file 'rubocop/files/rubocop.yml', '.rubocop.yml'

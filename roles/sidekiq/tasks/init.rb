@@ -1,4 +1,4 @@
-gem 'sidekiq'
+app.gem 'sidekiq'
 
 copy_file 'sidekiq/files/sidekiq.rb', 'config/initializers/sidekiq.rb'
 

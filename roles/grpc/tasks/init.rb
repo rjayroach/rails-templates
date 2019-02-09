@@ -1,7 +1,7 @@
 
-gem 'grpc'
-gem 'grpc-tools'
-gem 'protobuf-activerecord'
+app.gem 'grpc'
+app.gem 'grpc-tools'
+app.gem 'protobuf-activerecord'
 
 empty_directory 'app/messages'
 empty_directory 'app/protos'

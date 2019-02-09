@@ -3,7 +3,7 @@
 <% end -%>
 class HealthController < ActionController::API
   def index
-    render text: 'ok', status: :ok
+    render plain: 'ok', status: :ok
   end
 end
 <% if app.plugin? -%>
