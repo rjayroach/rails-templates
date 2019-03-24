@@ -1,5 +1,5 @@
 require_relative 'app'
-# require 'pry'
+require 'pry'
 def source_paths; Array(super) + [Pathname.new(template_dir), "#{Pathname.new(template_dir)}/roles"] end
 
 # binding.pry

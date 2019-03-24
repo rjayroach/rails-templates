@@ -1,3 +1,12 @@
+# frozen_string_literal: true
+
+# workaround for rails 6.0.0.beta2
+if app.plugin?
+  inject_into_file 'spec/dummy/config/application.rb', "require 'rails-html-sanitizer'", after: "require_relative 'boot'\n"
+else
+  application "require 'rails-html-sanitizer'"
+end
+
 generate 'rspec:install'
 
 empty_directory 'spec/support'
@@ -42,5 +51,3 @@ inject_into_file 'spec/rails_helper.rb', after: "config.infer_spec_type_from_fil
   end
 RUBY
 end
-
-append_file '.pryrc', "FB = FactoryBot if Rails.env.development?\n"

@@ -1,22 +1,87 @@
 # frozen_string_literal: true
+# See: https://richonrails.com/articles/easier-debugging-with-pry
+if Pry::Prompt[:rails]
+  desc = "Includes the current Rails environment and project folder name.\n" \
+          "[1] [project_name][Rails.env][Apartment::Tenant.current] pry(main)>"
+  Pry::Prompt.add 'railsa', desc, %w(> *) do |target_self, nest_level, pry, sep|
+    "[#{pry.input_ring.size}] " \
+      "[#{PryRails::Prompt.project_name}][#{PryRails::Prompt.formatted_env}][#{Apartment::Tenant.current}] " \
+    "#{pry.config.prompt_name}(#{Pry.view_clip(target_self)})" \
+    "#{":#{nest_level}" unless nest_level.zero?}#{sep} "
+  end
 
-def loff
-  @old_logger = ActiveRecord::Base.logger
-  ActiveRecord::Base.logger = nil
+  # Pry.config.prompt = Pry::Prompt[:rails][:value]
+  Pry.config.prompt = Pry::Prompt[:railsa][:value]
 end
 
-def lon
-  ActiveRecord::Base.logger = @old_logger
-end
+if defined?(ActiveRecord)
+  @memoized_shortcuts = {
+    ua: 'User::Account',
+    uaf: 'User::Account.first',
+    rc: 'Reward::Campaign',
+    rcf: 'Reward::Campaign.first',
+    rt: 'Reward::Transaction',
+    rvc: 'Reward::VoucherCode'
+  }
 
-def reset_memoized
-  # Add @some_var = nil
-end
+  # def tl; Doorkeeper::Application.order(:id).pluck(:id, :name, :schema_name) end
+  def tl
+    Tenant.pluck(:id, :schema_name).each_with_object([]) { |a, ary| ary << a.join(' ') }
+  end
+  def tc; Apartment::Tenant.current end
 
-# reset all vars and reload the model classes
-def r
-  reset_memoized
-  reload!
-end
+  def ta(id)
+    # app = Doorkeeper::Application.find(id)
+    app = Tenant.find(id)
+    Apartment::Tenant.switch!(app.schema_name)
+    tc
+  end
 
-loff
+  # 'Standard' pry methods
+  @memoized_shortcuts.each do |var, value|
+    define_method(var) do
+      instance_variable_get("@#{var}") || instance_variable_set("@#{var}", eval(value))
+    end
+  end if defined? @memoized_shortcuts and @memoized_shortcuts.is_a? Hash
+
+  FB = FactoryBot if defined? FactoryBot
+
+  def lo
+    if ActiveRecord::Base.logger.nil?
+      ActiveRecord::Base.logger = @old_logger
+    else
+      @old_logger = ActiveRecord::Base.logger
+      ActiveRecord::Base.logger = nil
+    end
+  end
+
+  def reset_memoized
+    @memoized_shortcuts.each_key { |var| instance_variable_set("@#{var}", nil) }
+  end
+
+  # reset all vars and reload the model classes
+  def r
+    reset_memoized if @memoized_shortcuts and @memoized_shortcuts.is_a? Hash
+    reload!
+  end
+
+  def bsm
+    record = { bucket: 'test', key: 'path/to/object' }
+    conn = Bunny.new(ENV['AMQP_URL'])
+    conn.start
+    ch = conn.create_channel
+    puts "#{record[:bucket]}/#{record[:key]}"
+    puts ENV['AMQP_QUEUE_NAME']
+    puts record.merge!({ tenant: 'hsbc', environment: 'development' })
+
+    res = ch.default_exchange.publish("#{record[:bucket]}/#{record[:key]}",
+                                      routing_key: ENV['AMQP_QUEUE_NAME'],
+                                      headers: record.merge({ version: ENV['AMQP_VERSION'].to_s }))
+
+    puts 'Here is output from bunny'
+    puts res
+    conn.close
+  end
+
+  lo
+end

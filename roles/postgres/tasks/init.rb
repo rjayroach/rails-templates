@@ -1,42 +1,35 @@
+# frozen_string_literal: true
+
 gem 'pg'
 
-run 'sudo apt install libpq-dev'
-# NOTE: This seems inefficient to do one line at a time, but a block append will not do variable substitution
-append_file '.env', "DATABASE_NAME=#{app.application_name}_development\n"
-append_file '.env', "DATABASE_TEST=#{app.application_name}_test\n"
-append_file '.env', "DATABASE_HOST=localhost\n"
-append_file '.env', "DATABASE_USERNAME=#{ENV['USER']}\n"
-append_file '.env', "DATABASE_PASSWORD=#{ENV['USER']}\n"
+# run 'sudo apt install libpq-dev'
+database_prefix = "#{app.application_name.remove('ros-').tr('-', '_')}"
 
 inside "#{app.app_dir}/config" do
   remove_file 'database.yml'
   create_file 'database.yml' do <<-EOF
+
 default: &default
   adapter: postgresql
-  database: <%= ENV['DATABASE_NAME'] %>
   encoding: unicode
-  host: <%= ENV['DATABASE_HOST'] %>
-  password: <%= ENV['DATABASE_PASSWORD'] %>
+  host: <%= ENV.fetch('RAILS_DATABASE_HOST') { 'localhost' } %>
+  username: <%= ENV.fetch('RAILS_DATABASE_USER') { '#{Etc.getlogin}' } %>
+  password: <%= ENV.fetch('RAILS_DATABASE_PASSWORD') { '#{Etc.getlogin}' } %>
+  pool: <%= ENV.fetch('RAILS_MAX_THREADS') { 5 } %>
   port: 5432
   timeout: 5000
-  username: <%= ENV['DATABASE_USERNAME'] %>
-
-  # For details on connection pooling, see rails configuration guide
-  # http://guides.rubyonrails.org/configuring.html#database-pooling
-  pool: <%= ENV['RAILS_MAX_THREADS'] || 5 %>
 
 development:
   <<: *default
+  database: #{database_prefix}_development
 
 test:
   <<: *default
-  database: <%= ENV['DATABASE_TEST'] %>
+  database: #{database_prefix}_test
 
 production:
   <<: *default
-  host: <%= ENV['DATABASE_HOST'] %>
-  password: <%= ENV['DATABASE_PASSWORD'] %>
-  username: <%= ENV['DATABASE_USERNAME'] %>
+  database: #{database_prefix}_production
 EOF
   end
 end
