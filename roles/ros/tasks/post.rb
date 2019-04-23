@@ -1,4 +1,8 @@
 # frozen_string_literal: true
+# Make a Ros Service Gem
+# Make a Ros Service that wraps a Ros Service Gem
+# Make a Project Service
+# Make a Project Core Gem
 
 if app.ros.tenant
   generate :model, 'Tenant', 'schema_name', 'properties:jsonb', 'platform_properties:jsonb'
@@ -17,8 +21,26 @@ RUBY
 end
 
 if app.ros.require_gems
-  gem 'ros-core', path: "#{app.ros.gems_path}/ros-core"
-  gem 'ros_sdk', path: "#{app.ros.gems_path}/ros-client"
+  gem 'ros-core', path: "#{app.ros.gems_path}/ros/services/core"
+  gem 'ros_sdk', path: "#{app.ros.gems_path}/ros/services/sdk"
+  # NOTE: The empty group is to put a separator between the above gems and the ones below.
+  # Without this, rails template will put them in alphabetical order which is a problem
+  gem_group(:development) do
+  end
+  project = Dir.pwd.split('/').pop(3).first
+  gem "#{project}-core", path: '../core'
+  gem "#{project}_sdk", path: '../sdk'
+end
+
+create_file 'doc/open_api.yml' do <<-FILE
+---
+api_docs:
+  info:
+    description: 'Service description'
+    version: '0.1.0'
+  server:
+    description: 'server description'
+FILE
 end
 
 # insert_into_file "lib/#{@namespaced_name}.rb", before: 'require' do <<-RUBY
@@ -48,7 +70,6 @@ inject_into_file file_name, after: ".api_only = true\n" do <<-RUBY
       initializer :console_methods do |app|
         Ros.config.factory_paths += Dir[Pathname.new(__FILE__).join('../../../../spec/factories')]
         Ros.config.model_paths += config.paths['app/models'].expanded
-        end
       end if Rails.env.development?
 RUBY
 end
@@ -69,7 +90,7 @@ inject_into_file "#{app.app_dir}/config/routes.rb", after: "routes.draw do\n" do
 RUBY
   end
 
-inject_into_file "#{app.app_dir}/config/routes.rb", before: "end" do <<-RUBY
+inject_into_file "#{app.app_dir}/config/routes.rb", before: /^end/ do <<-RUBY
   catch_not_found
 RUBY
 end

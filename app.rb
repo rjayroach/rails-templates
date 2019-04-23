@@ -1,4 +1,6 @@
 # require 'pry'
+require 'ostruct'
+require 'yaml'
 module Custom
   class Application
     attr_reader :parent_dir, :app_dir, :application_name, :controllers_path, :is_plugin, :template_path
@@ -41,13 +43,14 @@ module Custom
       }
     end
 
-    def load_yaml
+    def load_yaml(xname = nil)
       yml = YAML.load_file(yml_file)
-      return unless name = yml['configure']
+      return unless name = xname || yml['configure']
       @whitelist = yml[name]['whitelist'] if yml[name]['whitelist']
       @blacklist = yml[name]['blacklist'] if yml[name]['blacklist']
       @gemfile = yml[name]['gemfile'] if yml[name]['gemfile']
-      @ros = OpenStruct.new(yml[name]['ros'])
+      puts yml[name]['ros']
+      @ros = ::OpenStruct.new(yml[name]['ros'])
     end
 
     def initialize(rails_generator, template_path)
@@ -70,7 +73,7 @@ module Custom
       @blacklist = []
       @gems = {}
       @gem_group = 'all'
-      load_yaml if File.exists?(yml_file)
+      load_yaml(plugin? ? 'plugin' : 'service') if File.exists?(yml_file)
       @gemfile ||= {}
       @gemfile['blacklist'] ||= []
       @gemfile['whitelist'] ||= []
@@ -81,8 +84,17 @@ module Custom
       # TODO: if -T is passed and no --dummy-path is passed then no dummy dir is created and db:seed cannot be run
       #       also the path to rails-template is '..' rather the '../../..'
       # TODO: Find a variable in rails generator that indicates what dummy-path is and handle it
+      unless @yml_file
+        # TODO: Search path needs to be a parameter that is passed in; Otherwise it has to be at a specific location
+        search_path = plugin? ? '../../../..' : '../../../'
+        if yml_file = Dir["#{search_path}/**/rails-template.yml"].first
+          @yml_file = File.expand_path(yml_file)
+        end
+      end
+      # require 'pry'
       # binding.pry
-      @yml_file ||= "#{File.expand_path((plugin? ? '../../..' : '..'))}/rails-template.yml"
+      @yml_file
+      # @yml_file ||= "#{File.expand_path((plugin? ? '../../..' : '..'))}/rails-template.yml"
       # @yml_file ||= "#{File.expand_path(('..'))}/rails-template.yml"
     end
 

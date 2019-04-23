@@ -29,7 +29,7 @@ end
 RUBY
 end
 
-create_file db/seeds/development/data.seeds.rb do <<-RUBY
+create_file 'db/seeds/development/data.seeds.rb' do <<-RUBY
 # frozen_string_literal: true
 
 after 'development:tenants' do
